@@ -1,0 +1,42 @@
+# THROWAWAY spike manifest (Act 6 Task 1). NOT the product path.
+# GKE Pod-snapshot CRDs (all podsnapshot.gke.io/v1) that checkpoint the warm
+# vllm-spike pod's VRAM/CUDA + host state to GCS, then stop the pod to free it.
+#
+# IAM lesson carried from Act 5: with tokenSource: federatedP4SA the checkpoint
+# image is written to GCS by the gcp-sa-gkenode service agent
+# (service-<PROJECT_NUMBER>@gcp-sa-gkenode.iam.gserviceaccount.com), which must
+# hold roles/storage.admin on the bucket -- granted separately.
+---
+apiVersion: podsnapshot.gke.io/v1
+kind: PodSnapshotStorageConfig
+metadata:
+  name: act6-spike-storage
+  namespace: act6-spike
+spec:
+  snapshotStorageConfig:
+    gcs:
+      bucket: example-sandbox-act6-snap
+      tokenSource: federatedP4SA
+---
+apiVersion: podsnapshot.gke.io/v1
+kind: PodSnapshotPolicy
+metadata:
+  name: act6-spike-policy
+  namespace: act6-spike
+spec:
+  storageConfigName: act6-spike-storage
+  snapshotScope: whole-pod
+  selector:
+    matchLabels:
+      app: vllm-spike
+  triggerConfig:
+    type: manual
+    postCheckpoint: stop   # free the VRAM/RAM after a successful checkpoint
+---
+apiVersion: podsnapshot.gke.io/v1
+kind: PodSnapshotManualTrigger
+metadata:
+  name: act6-spike-trigger
+  namespace: act6-spike
+spec:
+  targetPod: vllm-spike

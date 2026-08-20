@@ -1,0 +1,31 @@
+# Provokes a cluster-autoscaler noScaleUp record on demand. The pod asks the
+# batch-cpu class for 200 vCPU; no rung shape can host it in any zone, so the
+# autoscaler evaluates every candidate MIG, rejects them all, and logs a
+# noScaleUp entry.
+#
+# Read what it produces, not what it looks like. Every reason in that record is
+# a fact about THIS POD being too large — no.scale.up.mig.failing.predicate with
+# NodeResourcesFit, and a no.scale.up.nap.pod.zonal.resources.exceeded per zone
+# that means "nothing fits", not "the zone is empty". The evidence ledger is
+# keyed by (shape, zone) and an entry penalises that pair as hard as a real
+# stockout, so it correctly ingests NOTHING from this pod. A tick against this
+# provocation reports "observations: 0"; that is the pass condition, not a
+# failure. See demo/act4/runbook.md, Beat 3.
+#
+# It only produces MIG-attributed rejections at all if a NAP MIG for the class
+# already exists — apply demo/act4/seed-nap-mig.yaml first.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: provoke-noscaleup
+  namespace: spot-demo
+spec:
+  restartPolicy: Never
+  nodeSelector:
+    cloud.google.com/compute-class: batch-cpu
+  containers:
+  - name: pause
+    image: registry.k8s.io/pause:3.10
+    resources:
+      requests:
+        cpu: "200"

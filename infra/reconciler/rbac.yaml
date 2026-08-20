@@ -1,0 +1,89 @@
+---
+# ComputeClasses are cluster-scoped, and pending pods can live in any namespace,
+# so those two verbs need a ClusterRole. Everything else stays namespaced.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: capacity-advisor
+rules:
+- apiGroups: ["cloud.google.com"]
+  resources: ["computeclasses"]
+  # Server-side apply only: `patch` covers the update path and `create` covers
+  # applying a class that does not exist yet. No UPDATE is ever issued.
+  verbs: ["get", "list", "create", "patch"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: capacity-advisor
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: capacity-advisor
+subjects:
+- kind: ServiceAccount
+  name: capacity-advisor
+  namespace: spot-demo
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: capacity-advisor
+  namespace: spot-demo
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  # resourceNames confines this to the reconciler's own state and its config;
+  # it cannot read or rewrite any other ConfigMap in the namespace.
+  resourceNames: ["capacity-advisor-state", "capacity-advisor-config"]
+  verbs: ["get", "update", "patch"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  # create needs no resourceName — the first tick creates the state map, and
+  # resourceNames cannot be applied to create.
+  verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: capacity-advisor
+  namespace: spot-demo
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: capacity-advisor
+subjects:
+- kind: ServiceAccount
+  name: capacity-advisor
+  namespace: spot-demo
+---
+# Events live in "default", not alongside the reconciler. Every event it emits
+# is about a ComputeClass, which is cluster-scoped, so involvedObject.namespace
+# is empty — and the API server accepts such an Event only in "default". A Role
+# there is still tighter than granting events cluster-wide.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: capacity-advisor-events
+  namespace: default
+rules:
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: capacity-advisor-events
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: capacity-advisor-events
+subjects:
+- kind: ServiceAccount
+  name: capacity-advisor
+  namespace: spot-demo

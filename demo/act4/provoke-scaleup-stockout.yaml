@@ -1,0 +1,47 @@
+# Provokes a scale.up.error.out.of.resources on an EXISTING NAP spot GPU MIG.
+# Unlike provoke-noscaleup.yaml (which makes NAP refuse a too-big pod), this
+# drives demand into the batch-gpu ComputeClass so the autoscaler must scale an
+# existing NAP MIG; if that MIG's zone is out of spot GPU capacity, the failure
+# surfaces as a scaleUp eventResult error — the signal the evidence reader now
+# collects. The MIG must be NAP-created (gke-<cluster>-nap-<shape>-...): only
+# those names carry the machine type the evidence ledger keys on.
+#
+# Prereq: the batch-gpu ComputeClass exists AND an existing NAP MIG for it (seed
+# one as demo/act4/seed-nap-mig.yaml does for the CPU class), so this burst
+# scales an EXISTING MIG rather than triggering fresh NAP creation.
+#
+# A genuine stockout needs real spot scarcity: an L4 run on 2026-08-03 did NOT
+# stock out (us-central1 had L4 spot capacity). A100 (a2-highgpu) spot is the
+# reliable lever. Live end-to-end verification is pending (see demo/act4/
+# runbook.md). Tear this down immediately after a tick observes the stockout —
+# it burns real spot GPU.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: provoke-scaleup-stockout
+  namespace: spot-demo
+spec:
+  parallelism: 16          # high parallelism drives the existing NAP MIG to scale beyond available spot
+  completions: 16
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      nodeSelector:
+        cloud.google.com/compute-class: batch-gpu
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+      - key: cloud.google.com/gke-spot
+        operator: Equal
+        value: "true"
+        effect: NoSchedule
+      containers:
+      - name: pause
+        image: registry.k8s.io/pause:3.10
+        resources:
+          requests:
+            nvidia.com/gpu: "1"
+          limits:
+            nvidia.com/gpu: "1"

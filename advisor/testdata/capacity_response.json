@@ -1,0 +1,13 @@
+{
+  "recommendations": [
+    {
+      "scores": {"obtainability": 0.9, "estimatedUptime": "600s"},
+      "shards": [
+        {"instanceCount": 90, "machineType": "n2-standard-2", "provisioningModel": "SPOT",
+         "zone": "https://www.googleapis.com/compute/beta/projects/p/zones/us-central1-a"},
+        {"instanceCount": 10, "machineType": "n2-standard-4", "provisioningModel": "SPOT",
+         "zone": "https://www.googleapis.com/compute/beta/projects/p/zones/us-central1-c"}
+      ]
+    }
+  ]
+}

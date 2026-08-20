@@ -1,0 +1,68 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: finetune-gemma
+  namespace: act3-finetune
+  labels:
+    kueue.x-k8s.io/queue-name: gpu-queue
+spec:
+  suspend: true # Kueue admits and unsuspends
+  backoffLimit: 20 # spot preemptions restart the pod; work resumes from /ckpt
+  template:
+    metadata:
+      labels:
+        app: tune-worker
+      annotations:
+        gke-gcsfuse/volumes: "true"
+    spec:
+      serviceAccountName: tune-worker
+      restartPolicy: Never
+      nodeSelector:
+        cloud.google.com/compute-class: batch-gpu
+      tolerations:
+      - key: cloud.google.com/gke-spot
+        operator: Equal
+        value: "true"
+        effect: NoSchedule
+      - key: cloud.google.com/compute-class
+        operator: Equal
+        value: batch-gpu
+        effect: NoSchedule
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+      containers:
+      - name: trainer
+        # us multi-region registry: one hostname for every US region, so the
+        # image path survives a region move without a rebuild or a rewrite.
+        image: us-docker.pkg.dev/example-sandbox/spot-demo/tune-worker:v1
+        env:
+        - name: CKPT_DIR
+          value: /ckpt/gemma-sql
+        - name: MAX_STEPS
+          value: "300"
+        - name: SAVE_STEPS
+          value: "50"
+        - name: HF_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: hf-token
+              key: token
+        volumeMounts:
+        - name: ckpt
+          mountPath: /ckpt
+        resources:
+          requests:
+            cpu: "3"
+            memory: 12Gi
+            nvidia.com/gpu: "1"
+          limits:
+            memory: 12Gi
+            nvidia.com/gpu: "1"
+      volumes:
+      - name: ckpt
+        csi:
+          driver: gcsfuse.csi.storage.gke.io
+          volumeAttributes:
+            bucketName: example-sandbox-spot-demo
+            mountOptions: "implicit-dirs,only-dir=checkpoints"

@@ -1,0 +1,36 @@
+# KEDA HTTPScaledObject for vLLM serving workload
+# Scales the vllm Deployment between 0 and 1 replicas based on HTTP traffic.
+# When idle, triggers snapshot-then-stop; on wake (0→1), restores from snapshot.
+#
+# Prerequisites:
+# - KEDA HTTP add-on installed (see README.md for installation command)
+# - PodSnapshot CRDs and storage configured (see podsnapshot.yaml)
+apiVersion: http.keda.sh/v1alpha1
+kind: HTTPScaledObject
+metadata:
+  name: vllm-http-scaler
+  namespace: act6-serve
+spec:
+  # Target the vllm Deployment for scaling decisions
+  scaleTargetRef:
+    name: vllm
+    kind: Deployment
+    apiVersion: apps/v1
+    service: vllm
+    port: 8000
+  # Scale between 0 (snapshot/stopped) and 1 (warm/serving) replicas
+  replicas:
+    min: 0
+    max: 1
+  # Host routing configuration — requests to this host are proxied to the vllm Service
+  hosts:
+  - vllm.act6-serve.svc.cluster.local
+  # Scaledown window: how long with no traffic before KEDA scales 1→0.
+  # IMPORTANT: KEDA does NOT trigger the PodSnapshot. A fresh snapshot must exist
+  # (manual PodSnapshotManualTrigger, or an automated PodSnapshotPolicy in production)
+  # BEFORE scale-down, or warm state is lost. The 5-minute window provides buffer
+  # for operators to snapshot before idle timeout, but automation is required.
+  scaledownPeriod: 300
+  # Target pending requests per replica to trigger scale-up from 0→1.
+  # Set to 1 so any incoming request immediately wakes the pod from snapshot.
+  targetPendingRequests: 1
