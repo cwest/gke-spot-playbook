@@ -10,7 +10,7 @@ sitting idle.
 
 It's built as a series of **acts** — each a runnable scenario with a runbook
 whose every claim is tagged `LIVE` (measured on a real cluster) or `PROJECTED`.
-The point is teaching: read an act, run it, watch the mechanism work.
+Read an act, run it, watch the mechanism work.
 
 > **Educational sample.** This is a demo/teaching repo, not a supported product.
 > The project id is a placeholder (`example-sandbox`); set your own before

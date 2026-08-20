@@ -88,7 +88,7 @@ When a new HTTP request arrives:
 3. The pod resumes with warm VRAM/CUDA state — **no model download, no weight load**.
 4. The pod serves the request in ~30s (vs. ~137s cold load).
 
-**Key insight:** The 0→1 path is **restore**, not cold start. The model never leaves VRAM between scale events; it's serialized to GCS and restored on wake.
+The 0→1 path is a restore, not a cold start. The model never leaves VRAM between scale events; it's serialized to GCS and restored on wake.
 
 ## Operational Notes
 

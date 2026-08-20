@@ -144,7 +144,7 @@ cold start at `~17:19:25Z`. A freshly cold-started process cannot show 8 minutes
 of uptime in 70 seconds. The process resumed from VRAM/host memory, it did not
 restart. (Same differentiator proven for CPU pods in Act 5, now for a GPU pod.)
 
-## Gotchas discovered (feed these into Tasks 3–7)
+## Gotchas Discovered
 
 1. **Workload Identity is a hard prerequisite for pod snapshots.**
    `--enable-pod-snapshots` at cluster-create time (without a workload pool)
@@ -161,7 +161,8 @@ restart. (Same differentiator proven for CPU pods in Act 5, now for a GPU pod.)
    during the spike (`ZONE_RESOURCE_POOL_EXHAUSTED`), while **spot had capacity**.
    Spot preempts (~9 min observed), but a PodSnapshot persists in GCS
    independent of node lifetime, so snapshot→restore survives preemption between
-   the two. Task 7 should plan multi-zone and region failover for the GPU pool.
+   the two. Multi-zone and region failover for the GPU pool is worth planning for
+   the same reason.
 5. **gVisor stdout capture is flaky** via `kubectl logs` — set
    `PYTHONUNBUFFERED=1` and use `--timestamps`; `localhost` resolves to IPv6, so
    probe `127.0.0.1` inside the pod.

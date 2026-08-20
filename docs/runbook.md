@@ -1,11 +1,11 @@
 # Operator runbook
 
-## Migrating a pre-Plan-4 regional bucket
+## Migrating a single-region bucket to US multi-region
 
-`infra/06-gpu-data.sh` now creates `gs://${PROJECT}-spot-demo` in the US
-multi-region. A bucket created before Plan 4 is pinned to one region; the script
-only warns about it and never deletes demo data. Migrating is a deliberate,
-manual operation — run the steps below in order.
+`infra/06-gpu-data.sh` creates `gs://${PROJECT}-spot-demo` in the US
+multi-region. A bucket created by an older version of the script is pinned to one
+region; the current script only warns about it and never deletes demo data.
+Migrating is a deliberate, manual operation — run the steps below in order.
 
 **Step 0 — set up the shell.** The infra scripts read `PROJECT` from
 `spotdemo::init`, not from your shell, so export it yourself before pasting
