@@ -261,7 +261,7 @@ cd advisor && env -u GOOGLE_APPLICATION_CREDENTIALS go run ./cmd/capacity-adviso
 cd ..
 ```
 
-> **Collector simplification (state it out loud).** The collector labels a node
+> **Collector simplification.** The collector labels a node
 > `spot` only when it carries `cloud.google.com/gke-spot=true`. A **flex-start**
 > node has no such label, so it would be recorded as **on-demand** — which
 > **overstates** the bill, never understates it. Separately, the collector only
