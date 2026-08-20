@@ -14,13 +14,12 @@ server-side applies the ladder — but only when the change is real enough to
 clear a hysteresis bar. This runbook is the live verification of that loop
 against the `spot-demo` cluster in `us-central1`, run on **2026-08-02 (UTC)**.
 
-It found four defects, all fixed on this branch, and they are recorded here
-rather than smoothed over — because both failure modes they represent are
+The verification turned up four defects, and both failure modes behind them are
 silent. "The reconciler said success and did nothing" is the first, and it is
-the one this act was written to rule out. The second is worse and was not
-anticipated: **the reconciler said success and confidently did the wrong
-thing**, penalising two perfectly healthy zones and advising a region migration
-on the strength of it. Beat 3 is now mostly about that.
+the one an automated loop like this exists to rule out. The second is worse:
+**the reconciler said success and confidently did the wrong thing**, penalising
+two perfectly healthy zones and advising a region migration on the strength of
+it. Beat 3 is mostly about that.
 
 > **Credentials warning (read once).** Running `kubectl`, `go run`, or `gcloud`
 > ad hoc from a shell that has `GOOGLE_APPLICATION_CREDENTIALS` set will use the
@@ -173,7 +172,7 @@ State after adoption — an empty ledger, both classes fingerprinted, and
 
 > **This tick found the first defect.** It also logged three warnings that are
 > not in the expected output above, because they should not have happened. See
-> "Deviations", defect 1.
+> defect 1 below.
 
 ---
 
@@ -188,7 +187,7 @@ no-op:    batch-gpu
 advisory: us-south1 scores 0.810 vs 0.300 here at $0.0069/unit-hr — …
 ```
 
-**The no-op is the point, and it is the hardest thing here to get right.** A
+**The no-op is the hardest thing here to get right.** A
 controller that re-applies an identical object every ten minutes is not
 idempotent in any sense an operator cares about: it bumps `metadata.generation`
 on a cluster-scoped resource forever, floods the event stream, and makes
@@ -227,8 +226,8 @@ env -u GOOGLE_APPLICATION_CREDENTIALS kubectl apply -f demo/act4/seed-nap-mig.ya
 env -u GOOGLE_APPLICATION_CREDENTIALS kubectl apply -f demo/act4/provoke-noscaleup.yaml
 ```
 
-The 200-vCPU pod is the provocation; the seed pod is a prerequisite the plan did
-not anticipate. **The autoscaler can only reject a MIG that already exists.**
+The 200-vCPU pod is the provocation; the seed pod is a prerequisite that is easy
+to miss. **The autoscaler can only reject a MIG that already exists.**
 With no `batch-cpu` node pool, a 200-vCPU pod produces a pod-group-level
 `napFailureReasons` entry that names a zone but no shape — which the evidence
 parser deliberately refuses to attribute, because writing a shape it did not
@@ -301,7 +300,7 @@ it says something else entirely: **a pod asking for 200 vCPU does not fit on an
 8-vCPU machine.** Every line of it is a fact about the pod. Not one line is a
 fact about capacity.
 
-### The false positive this beat actually found
+### The false positive a careless read produces
 
 The parser did read it carelessly, and the live cluster showed what that costs:
 
@@ -327,8 +326,7 @@ against two rejected MIGs. `Ledger.Add` keeps the newest per `(shape, zone)` and
 compounding — the count an operator reads was never inflated. Only the two rows
 were wrong, and two was enough.)
 
-That is the whole hazard of an evidence-weighted score, and it is worth being
-precise about why it bites here. The ledger is keyed by `(shape, zone)` and an
+The ledger is keyed by `(shape, zone)` and an
 entry drops that pair's weight straight to the floor — the same penalty a hard
 stockout earns. So only a fact about *that pair* may ever be written to it. Two
 distinct confusions put pod facts there:
@@ -350,7 +348,7 @@ shape also fails `NodeResourcesFit` against MIGs of that shape that already
 exist. A genuinely empty zone would not simultaneously report that the pod is
 too big for the shape it is refusing to build. So zonal exhaustion is believed
 only for a shape whose own MIGs did not reject the pod on size — and the
-predicate *name* is load-bearing, because a `NodeAffinity` or taint rejection
+predicate *name* matters, because a `NodeAffinity` or taint rejection
 means the pod was steered away, which says nothing about whether the zone had
 capacity.
 
@@ -360,7 +358,7 @@ signal that gets fabricated steers a live ladder off a healthy rung. So the
 pod-fact reasons are enumerated and skipped, and anything unrecognised is still
 read as evidence.
 
-### What the fixed reconciler does with the same provocation
+### What a correct read does with the same provocation
 
 The provocation was left pending, the state ConfigMap deleted to force a cold
 start, and the tick re-run against the identical record:
@@ -381,9 +379,9 @@ applied classes: ['batch-cpu', 'batch-gpu']
 **Zero observations, an empty ledger, and `us-central1` holding at its
 unpenalised 0.300.** The query did run — `lastLogQuery` advanced, because the
 provocation pod really was pending — read the record, and correctly concluded it
-had learned nothing about capacity. That is the beat: not that the reconciler
-reacts to whatever the cluster reports, but that it reacts to the part that is
-actually about capacity and discards the rest.
+had learned nothing about capacity. The reconciler does not react to whatever
+the cluster reports; it reacts to the part that is about capacity and discards
+the rest.
 
 The events confirm the same tick end to end:
 
@@ -408,7 +406,7 @@ What is proven, and where:
   fixture and pinned by six tests in `gcplog_test.go`, each verified to fail
   when the discrimination it covers is removed.
 - **The score collapse itself** — arithmetic independent of where the
-  observation came from. The pre-fix run measured it on the live cluster: two
+  observation came from. It was measured on the live cluster: two
   `(t2d-standard-8, zone)` entries drove `us-central1` from 0.300 to 0.047, a 6×
   penalty, and Beat 4's decay curve was measured on entries just like them. A
   real stockout writes the same rows; only their provenance was wrong.
@@ -419,15 +417,15 @@ What is proven, and where:
 options are all bad: ask for a shape with no regional stock (unreliable, and it
 moves), ask for quota you do not have (a different message id entirely), or wait
 for a real stockout (what cost Act 3 days). That is the gap this act closes
-least well, and it is why the pre-fix numbers are kept here rather than deleted
-— they are the only live measurement of the reaction that exists.
+least well. The numbers above are the only live measurement of the reaction
+that exists, which is why they stay.
 
 ### Why the ladder did not move under evidence, and why that was correct
 
-Worth keeping from the pre-fix run, because it is the behaviour a real stockout
-will trigger, and the plan asks for the reason behind a no-op rather than an
-assumption. This is not the ordinary reason ("the crushed zone was not in the
-top rung") — here the crushed zones *were* the entire top rung:
+This is the behaviour a real stockout will trigger, so it is worth the reason
+behind the no-op rather than an assumption. It is not the ordinary reason ("the
+crushed zone was not in the top rung") — here the crushed zones *were* the
+entire top rung:
 
 1. Evidence sets each zone's factor to `floor` (0.05) at the instant of
    observation, recovering with a 30-minute half-life. `dryBelow` is 0.5, so a
@@ -451,18 +449,19 @@ region advisory.
 The exhaustion marker is emitted as a YAML comment on the rendered class
 (`# rung t2d-standard-8 … exhausted=all-zones-dry`) and is therefore **stripped
 by server-side apply** — visible in `capacity-advisor analyze --render` output
-but not on the live object. That is a real observability gap; see Deviations.
+but not on the live object. That is a real observability gap; see "What the live
+run surfaced" below.
 
 ---
 
 ## Beat 4: it forgets
 
-> **Measured before the Beat 3 fix, and kept.** These ticks ran while the parser
-> was still writing pod facts into the ledger, so the two entries decaying below
-> should never have been there. What they exercise — `Factor`, `dryBelow`, and
-> the gate on the log query — reads only a key and an `at` timestamp and cannot
-> tell how the row was written. A real stockout produces rows of exactly this
-> shape. The decay curve is therefore measured, and its source was wrong.
+> **These entries were written by the pre-discrimination parser.** The two
+> entries decaying below are pod facts that should never have reached the ledger.
+> What they exercise — `Factor`, `dryBelow`, and the gate on the log query —
+> reads only a key and an `at` timestamp and cannot tell how the row was
+> written. A real stockout produces rows of exactly this shape, so the decay
+> curve is measured even though its source was wrong.
 
 ```bash
 env -u GOOGLE_APPLICATION_CREDENTIALS kubectl -n spot-demo delete pod provoke-noscaleup
@@ -499,8 +498,6 @@ age-zero observation would score 0.015. **The floor is reached by the
 observation, not by the tick that notices it** — which is also why a tick
 arriving late still applies a meaningful penalty rather than none.
 
-Two things in that last tick are worth reading carefully:
-
 ```
 lastLogQuery: 2026-08-02T18:50:03.126613195Z
 t2d-standard-8 us-central1-b no.scale.up.mig.failing.predicate 2026-08-02T18:46:07Z
@@ -515,8 +512,7 @@ cluster that is not waiting on capacity does not pay to ask why.
 
 **The ledger stores the observation, not the weight.** The keys and their `at`
 timestamps are unchanged; the decay is a function of age computed at read time.
-That is why the decay is visible in the score and not in the ConfigMap — see
-Deviations.
+That is why the decay is visible in the score and not in the ConfigMap.
 
 ### Cleanup
 
@@ -561,10 +557,9 @@ Still in place. No action.
 Beats 1–4 exercise one half of what the autoscaler can refuse: `noScaleUp`, the
 decision *not to create* a node. The other half is a node the autoscaler *tries*
 to create and cannot, because an **existing** MIG's zone is out of spot stock.
-That is `scale.up.error.out.of.resources`, and Beat 3's "Observations worth
-recording" flagged it as the one class of genuine capacity refusal this reader
-never saw — the most likely source of the very evidence Beat 3 could not
-provoke. This branch closes the collection gap.
+That is `scale.up.error.out.of.resources` — a class of genuine capacity refusal
+the `noScaleUp` read never sees, and the most likely source of the very evidence
+Beat 3 could not provoke. The reader collects it too.
 
 **A failed scale-up is split across two log events.** A `noScaleUp` record is
 self-contained; a stockout is not. The autoscaler writes a `decision.scaleUp`
@@ -586,12 +581,12 @@ sequenceDiagram
   R-->>R: Observation(shape, zone) — or drop if either is missing
 ```
 
-The reader's interface collapsed to match. What was a `NoScaleUp` method is now
-a single `Refusals` that returns both kinds of refusal merged into one
+The reader's interface reflects that. A single `Refusals` method returns both
+kinds of refusal merged into one
 `[]evidence.Observation`; the reconciler does not care which list a refusal came
 from, only that a zone refused capacity for a shape. Everything downstream —
-`ingest`, `Ledger.Add`, the decay curve, the scoring — is untouched. This beat
-adds a source of observations, nothing else.
+`ingest`, `Ledger.Add`, the decay curve, the scoring — is untouched. This adds a
+source of observations, nothing else.
 
 ### The recipe
 
@@ -607,8 +602,7 @@ prerequisite is the mirror of Beat 3's seed-first lesson, with a sharper edge:
 the MIG must be **NAP-created**. An explicit node pool will not do — its MIG name
 is `gke-<cluster>-<poolname>-…` and carries no `nap-<shape>` segment, so
 `migShapeRe` parses no shape from it and the observation is dropped as
-unattributable. Only a `gke-<cluster>-nap-<shape>-…` MIG works. This was learned
-the hard way; see below.
+unattributable. Only a `gke-<cluster>-nap-<shape>-…` MIG works.
 
 ### The honest finding
 
@@ -625,11 +619,10 @@ by code. This is the same wall Beat 3 hit from the other side: an unschedulable
 pod cannot manufacture capacity evidence, and abundant spot cannot be talked
 into refusing it. You cannot summon a real GCE stockout when the stock is there.
 
-The first attempt also taught the pool-shape lesson above. It was aimed at an
-explicit L4 pool; the scale-up's MIG name had no `nap-` segment, `migShapeRe`
-returned nothing, and the join produced zero observations even where a failure
-would have landed. The recipe was corrected to the `batch-gpu` NAP path, which
-is the only path whose MIG names the ledger can key on.
+Aim the provocation at an explicit L4 pool instead and the join produces zero
+observations even where a failure would have landed: the scale-up's MIG name has
+no `nap-` segment, so `migShapeRe` returns nothing. Only the `batch-gpu` NAP
+path yields MIG names the ledger can key on.
 
 ### What is proven, and where
 
@@ -658,7 +651,7 @@ summoned while capacity exists. The collection code is now in place for both
 kinds of refusal; the ability to *provoke* one on command is bounded by spot
 availability, not by anything in this repo. What changed is the reach of the
 reader, not the reliability of the demo — when scarcity returns, the reconciler
-will now see the half of the story it used to miss.
+will see the half of the story a `noScaleUp`-only read leaves out.
 
 ---
 
@@ -723,7 +716,7 @@ insert one tick, reap the next — is pinned by the unit tests, not this run).
 
 ### What this beat does not prove
 
-Two things, both honest and both the same shape as Beat 5's limitation:
+Two things, both the same kind as Beat 5's limitation:
 
 - **The stockout mapping is not exercised.** `us-central1-a` had `e2` capacity
   (as it had L4 and A100 in Beat 5), so the probe returned `obtained`. The
@@ -746,7 +739,7 @@ first, which it does not — a separate future step.
 
 ---
 
-## The hand deviations
+## What the automated ladder does differently from a hand-built one
 
 Act 3 ended with two hand edits to the live ladder: `batch-gpu` widened to four
 zones, and a `g2-standard-8` spot rung added at `priorityScore: 900` because a
@@ -757,7 +750,7 @@ a single `g2-standard-4` rung in `us-central1-a` plus the flex-start floor —
 one zone, not four, and no `g2-standard-8` rung at all. `batch-cpu` likewise
 moved from the hand-set `[us-central1-a]` to `[us-central1-b, us-central1-c]`.
 
-This is the honest result, and it is not a regression:
+Neither difference is a regression:
 
 - **The four-zone widening was a response to evidence the reconciler no longer
   has.** Those L4 stockouts were in July. Evidence has a 6-hour `maxAge` and a
@@ -767,18 +760,16 @@ This is the honest result, and it is not a regression:
 - **The `g2-standard-8` rung came from a live probe, and the probe is off.**
   `probe.enabled: false` by default because it creates a real spot VM. The
   reconciler scores what the advice API and the ledger tell it; "capacity
-  exists one shape up" is knowledge only a probe produces. Act 3 recommended
-  automating verify-by-probe; Plan 4 built the probe and left the automation
-  out. **That gap is now half-closed (Beat 6):** the reconciler automatically
-  probes before it *widens* a dry rung onto a never-sampled zone, so the
-  four-zone widening would now fall out of scoring plus a live probe rather than
-  a hand edit. Promoting a larger *shape* the advice API never offered (the
-  `g2-standard-8` rung) still is not automated — that needs the analysis to
-  propose the shape first, which it does not.
+  exists one shape up" is knowledge only a probe produces. **Widen-by-probe is
+  now automated (Beat 6):** the reconciler probes before it *widens* a dry rung
+  onto a never-sampled zone, so the four-zone widening would now fall out of
+  scoring plus a live probe rather than a hand edit. Promoting a larger *shape*
+  the advice API never offered (the `g2-standard-8` rung) still is not automated
+  — that needs the analysis to propose the shape first, which it does not.
 - **What the reconciler does reproduce is the mechanism, not the answer.** The
   widening logic is there — an evidence-dry rung is rebuilt from the in-region
   zones the advice API never sampled, which is exactly the hand edit Act 3
-  performed. It did not fire during this verification because the widening
+  performed. It did not fire on this run because the widening
   universe was exhausted (Beat 3), not because the feature is absent.
 
 The through-line from Act 3 stands: the score is a prior to be verified. Act 4
@@ -791,7 +782,7 @@ itself, and leaves the money-spending probe as an explicit human decision.
 
 **ProvisioningRequest.** Act 3's saga ends by saying "Plan 4 fixes this by
 wiring a Kueue `ProvisioningRequest` admission check so the flex rung actually
-engages when spot is exhausted." **Plan 4 does not do that**, and the promise
+engages when spot is exhausted." **Act 4 does not do that**, and the promise
 should be read as retracted. `ProvisioningRequest` /
 `queued-provisioning.gke.io` is documented as incompatible with custom compute
 classes, which is what this whole demo is built on. Wiring it would mean
@@ -821,11 +812,9 @@ install still probes nothing.
 
 ---
 
-## Deviations
+## What the live run surfaced
 
-Everything below did not behave as the plan predicted.
-
-### Four defects found by this verification, all fixed on this branch
+### Four silent-failure defects, and what each one teaches
 
 **1. Every event the reconciler emitted was rejected by the API server.** The
 first live tick logged:
@@ -853,10 +842,10 @@ it then fails.
 already fixed in the registry. Fixed to `imagePullPolicy: Always`.
 
 **3. The evidence parser wrote facts about the pod into a ledger keyed by
-capacity.** The one that matters, and the reason Beat 3 was rewritten. Any
+capacity.** The one that matters, and the reason Beat 3 leads with it. Any
 non-empty `messageId` became an observation, so an unschedulable pod condemned
-`us-central1-b` and `-c` to the evidence floor and drove the region score to
-0.047. The full anatomy is in Beat 3; the mechanism in one line is that
+`us-central1-b` and `-c` to the evidence floor and drove the region score down
+by 6×. The full anatomy is in Beat 3; the mechanism in one line is that
 `Ledger.Add` treats every entry as a hard stockout, so writing anything that is
 not a fact about that exact `(shape, zone)` pair is not a small error.
 
@@ -877,74 +866,31 @@ asserted the new behaviour rather than the desired one — the fixtures were bui
 from the same misreading. Reverted; the MIG `reason` is now decoded only for its
 predicate parameters, never as evidence.
 
-The lesson worth carrying: two live re-provocations caught this, and the unit
-suite caught neither. After the first fix the tests were green and the live
-cluster still condemned two healthy zones, because the pod-group path was
-untouched. A test written from a misunderstanding encodes the
-misunderstanding.
+Two live re-provocations caught this, and the unit suite caught neither. After
+the first fix the tests were green and the live cluster still condemned two
+healthy zones, because the pod-group path was untouched. A test written from a
+misunderstanding encodes the misunderstanding.
 
-### Where the plan's steps were wrong
+### Field notes for anyone running this loop
 
-- **Step 5's premise.** The plan asserts the 200-vCPU pod yields "the same
-  `parameters` zone and the same `rejectedMigs` shape" as a real stockout. It
-  does not — with no NAP MIG in existence it yields zone-only
-  `napFailureReasons` and no MIGs at all, which `ParseEntry` correctly refuses
-  to attribute. A MIG must be seeded first
-  (`demo/act4/seed-nap-mig.yaml`, added for this reason).
-- **The provocation is therefore not free.** The plan says "no node is ever
-  created, so the whole verification costs nothing." The seed pod runs one
-  `t2d-standard-8` spot node for a few minutes, and leaves an auto-created node
-  pool that must be deleted by hand.
-- **Step 5's premise is wrong in a second, larger way.** Even with a MIG
-  seeded, an unschedulable pod does not yield "the same record as a real
-  stockout". It yields a record that is entirely about the pod, and a correct
-  parser learns nothing from it (Beat 3). The plan's whole verification strategy
-  for the reaction path rests on this equivalence, and the equivalence does not
-  hold. Provoking genuine capacity evidence on demand is unsolved.
-- **The record's shape is not stable between reads.** The 18:40Z capture carried
-  `rejectedMigs` and no `napFailureReasons`; the 19:38Z capture of the same
-  still-pending pod carried both. Anything that assumes one list is always
+- **The autoscaler's record is not stable between reads.** The 18:40Z capture
+  carried `rejectedMigs` and no `napFailureReasons`; the 19:38Z capture of the
+  same still-pending pod carried both. Anything that assumes one list is always
   present will work until it does not.
-- **Step 2's dry-run command is not valid.** `kubectl create job --from=... --
-  <cmd>` fails with `cannot specify --from and command`. Worked around by
-  rendering the Job with `--dry-run=client -o json`, appending `--dry-run` to
-  the container args, and applying it (the form shown in Beat 1). The bare
-  `--from` with no command override, used by every other step, is fine.
-- **Step 6's verification command targets the wrong namespace.** Events are in
-  `default`, not `spot-demo` — a consequence of defect 1's fix.
-- **Step 7 expects "the same key, a strictly smaller weight" in the ledger.**
-  The ledger stores the newest observation per key, not a weight; the weight is
-  derived from the observation's age at read time. Decay is observable in the
-  region score (0.036 → 0.040 → 0.061), not in the ConfigMap.
-- **Steps 7 and 9 name job `advisor-4`.** The live runs used `advisor-5` and
-  `advisor-6` for the decay measurements and `advisor-c1a`/`advisor-c1b` for the
-  two post-fix re-provocations; earlier numbers were consumed re-verifying the
-  defect fixes.
-- **`README.md` does not exist.** The plan's Step 11 says to add Act 4 to its
-  acts list. There is no root README in this repo (`advisor/README.md` is the
-  advisor tool's own docs, not the setup guide). Following Task 12's precedent,
-  the pointer went to `docs/runbook.md` under "Installing the capacity
-  reconciler".
-
-### Observations worth recording
-
 - **The advice API is noisy tick to tick.** The same `us-south1` scored 0.810,
   0.540, and 0.810 within an hour, and the second-ranked region alternated
   between `us-west1` and `us-east1`. This is the noise `minScoreDelta` and
   `consecutiveTicks` exist to absorb, and it is a good argument against ever
   applying on a single reading.
-- **The log query used to read only `noScaleUp`, and that is not where every
-  stockout lands — now it reads both (this branch).** `Filter` originally
-  selected `jsonPayload.noDecisionStatus.noScaleUp:*`, which covers the
-  autoscaler declining to create a node. A stockout hitting an **existing** MIG
-  that is trying to scale surfaces instead as
-  `scale.up.error.out.of.resources` under the `scaleUp` decision, and the reader
-  never saw it. Beat 5 closes that: the filter is broadened to the
-  `decision.scaleUp` / `eventResult` pair and the reader joins them by `eventId`
-  into the same `(shape, zone)` observations. The **collection** is implemented
-  and unit-tested; what remains capacity-dependent is **provoking** such a
-  stockout on demand, which no code can guarantee while spot stock is healthy
-  (Beat 5's honest finding).
+- **A `noScaleUp` filter alone misses scale-up stockouts.** A filter selecting
+  `jsonPayload.noDecisionStatus.noScaleUp:*` covers the autoscaler declining to
+  create a node. A stockout hitting an **existing** MIG that is trying to scale
+  surfaces instead as `scale.up.error.out.of.resources` under the `scaleUp`
+  decision. Beat 5 broadens the filter to the `decision.scaleUp` / `eventResult`
+  pair and joins them by `eventId` into the same `(shape, zone)` observations.
+  The **collection** is implemented and unit-tested; what remains
+  capacity-dependent is **provoking** such a stockout on demand, which no code
+  can guarantee while spot stock is healthy (Beat 5's honest finding).
 - **`exhausted=all-zones-dry` is invisible on the live cluster.** The render
   emits it as a YAML comment, and server-side apply strips comments. An
   operator asking "why didn't the ladder move?" has to re-run
