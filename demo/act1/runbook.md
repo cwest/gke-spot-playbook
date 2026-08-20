@@ -1,7 +1,6 @@
 # Act 1 runbook — "spot survives"
 
 Three beats: **advise → provision/run → survive**, then a zero-loss ledger.
-Every command below comes from an earlier task; nothing new is introduced here.
 
 > **Credentials warning (read once).** Running `kubectl`, `go run`, or `gcloud`
 > ad hoc from a shell that has `GOOGLE_APPLICATION_CREDENTIALS` set will use the
@@ -30,7 +29,7 @@ open out/advice-report-cpu-batch.md   # or: less out/advice-report-cpu-batch.md
 
 Talk track: open `out/advice-report-cpu-batch.md` and point at
 
-- the **preemption sparkline** (30-day daily preemption shape per candidate),
+- the **preemption sparkline** (30-day daily preemption pattern per candidate),
 - the **composite score** ranking, and
 - the **chosen region/zone** — for cpu-batch this lands on
   **t2d-standard-8 @ us-south1-b** (obtainability 0.90, spot **$0.0554/hr**).
@@ -381,12 +380,11 @@ Always-on peak-sized on-demand pool for this window: $0.4680
 73.4% spot discount compounded with 42.9% duty cycle → **84.8% cheaper than the standard way**
 ```
 
-On the advisor-chosen hardware the per-node spot rate is **$0.0554/hr** vs the
-Billing-Catalog on-demand list **$0.3988/hr** — an **86%** per-node spot discount
-that lands the two incentives on the same node pool: the advisor picked
-`t2d-standard-8 @ us-south1-b` because it was the most *obtainable* spot capacity,
-and that same choice is what makes the run **~85% cheaper** than an always-on
-on-demand pool. The report's aggregate Factor 1 (73.4%, below the 86% per-node
-figure) and the 84.8% combined savings are diluted by the always-on
-`e2-standard-4` default/system node, which runs on-demand for the whole window
-and is counted honestly rather than excluded from the bill.
+On the advisor-chosen hardware the per-node spot rate is far below the
+Billing-Catalog on-demand list, and that discount lands the two incentives on the
+same node pool: the advisor picked `t2d-standard-8 @ us-south1-b` because it was
+the most *obtainable* spot capacity, and that same choice is what makes the run
+much cheaper than an always-on on-demand pool. The report's aggregate spot
+discount comes in below the per-node figure, and the combined savings are diluted
+by the always-on `e2-standard-4` default/system node, which runs on-demand for
+the whole window and is counted honestly rather than excluded from the bill.

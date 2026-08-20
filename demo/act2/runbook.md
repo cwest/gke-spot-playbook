@@ -7,8 +7,6 @@ preemption instead of restarting. Same three beats plus a migration:
 **advise (GPU-led) → migrate → provision/run → survive**, then a zero-regression
 ledger and the bill.
 
-Nothing new is introduced here; every command comes from an earlier task.
-
 > **Credentials warning (read once).** Running `kubectl`, `go run`, or `gcloud`
 > ad hoc from a shell that has `GOOGLE_APPLICATION_CREDENTIALS` set will use the
 > wrong identity and fail (the coder SA lacks `container`/pubsub perms →
@@ -184,11 +182,6 @@ ComputeClass auto-provisions `g2` **spot** nodes (one L4 each). NAP sizes the
 machine to fit the pod (cpu 3 + 1×L4), so it may land on `g2-standard-8` rather
 than `g2-standard-4` — either is one L4. Watch:
 
-> **Historical note (see Deviations section below).** During the verified run,
-> the renderer initially omitted the `gpu:` block, blocking NAP provisioning. The
-> renderer was fixed to emit the block (`{type: nvidia-l4, count: N}`) on all spot
-> and fallback rungs. A fresh `analyze --render` now provisions correctly.
-
 ```bash
 bash demo/watch.sh              # nodes + spot labels
 bash demo/act2/progress.sh      # batch files written + shards complete (poll it)
@@ -256,7 +249,7 @@ kill "${COLLECTOR_PID}"
 ```
 
 Build the two-factor report. `g2` on-demand list price comes from the Cloud
-Billing Catalog (Task 3 added g2 SKUs); spot comes from the advisor's
+Billing Catalog; spot comes from the advisor's
 `capacityHistory` signal. `--interval` **must** match the collector's
 `COLLECT_INTERVAL` so node-hours are computed correctly:
 
@@ -445,8 +438,8 @@ Always-on peak-sized on-demand pool for this window: $3.3998
 
 **Two incentives, one node pool.** The advisor picked `g2-standard-4 @ us-east1-c`
 because it was the most *obtainable* L4 spot capacity, and that same choice is what
-makes the run cheap: a **27.7%** spot discount compounded with a **90.4%** duty
-cycle → **93.1% cheaper** than an always-on on-demand pool.
+makes the run cheap: the spot discount compounds with the duty-cycle saving, and
+together they land the run well under an always-on on-demand pool.
 
 **Per-chunk cost** = $0.2362 ÷ 50,000 = **$0.0000047 / chunk** (~$0.0047 per 1,000
 chunks embedded).
@@ -459,7 +452,7 @@ chunks embedded).
 > node-hours here slightly **under**count the true run; the savings percentages are
 > unaffected (they are ratios over the same sampled node-hours).
 
-### Deviations from the scripted flow (and fixes applied)
+### Two Problems the Run Hit, and How They Were Resolved
 
 1. **Corpus loader Python version.** `datasets==3.0.0` is incompatible with the
    local Python 3.14 (`dill` pickler error). Rebuilt the loader venv with
@@ -497,14 +490,9 @@ chunks embedded).
      whenUnsatisfiable: ScaleUpAnyway
    ```
 
-   NAP created the L4 spot pool within ~30s of applying this. **Follow-up (not in
-   this task's scope):** `advisor/internal/render/computeclass.go` should emit a
-   `gpu:` block for the gpu profile (threading accelerator type/count) and rethink
-   the `DoNotScaleUp` + flexStart pairing for GPU classes. Tracked as a renderer
-   fix with its own tests; `out/` is gitignored so this run's hand-edited YAML is
-   not committed. **Update:** the renderer has since been fixed to emit the `gpu:`
-   block (`{type: nvidia-l4, count: N}`) on every spot rung and the flexStart rung
-   (this commit), so a fresh `analyze --render` now produces a provisioning class
+   NAP created the L4 spot pool within ~30s of applying this. The renderer now
+   emits the `gpu:` block (`{type: nvidia-l4, count: N}`) on every spot rung and
+   the flexStart rung, so a fresh `analyze --render` produces a provisioning class
    without the hand-edit above.
 
 ---
