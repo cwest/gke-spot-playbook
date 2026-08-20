@@ -438,8 +438,8 @@ Always-on peak-sized on-demand pool for this window: $3.3998
 
 **Two incentives, one node pool.** The advisor picked `g2-standard-4 @ us-east1-c`
 because it was the most *obtainable* L4 spot capacity, and that same choice is what
-makes the run cheap: the spot discount compounds with the duty-cycle saving, and
-together they land the run well under an always-on on-demand pool.
+makes the run cheap: the 27.7% spot discount compounds with the 90.4% duty-cycle
+saving, and together they land the run 93.1% under an always-on on-demand pool.
 
 **Per-chunk cost** = $0.2362 ÷ 50,000 = **$0.0000047 / chunk** (~$0.0047 per 1,000
 chunks embedded).
@@ -452,7 +452,7 @@ chunks embedded).
 > node-hours here slightly **under**count the true run; the savings percentages are
 > unaffected (they are ratios over the same sampled node-hours).
 
-### Two Problems the Run Hit, and How They Were Resolved
+### Two Failures to Expect: Corpus Loader and GPU Provisioning
 
 1. **Corpus loader Python version.** `datasets==3.0.0` is incompatible with the
    local Python 3.14 (`dill` pickler error). Rebuilt the loader venv with

@@ -380,11 +380,10 @@ Always-on peak-sized on-demand pool for this window: $0.4680
 73.4% spot discount compounded with 42.9% duty cycle → **84.8% cheaper than the standard way**
 ```
 
-On the advisor-chosen hardware the per-node spot rate is far below the
-Billing-Catalog on-demand list, and that discount lands the two incentives on the
-same node pool: the advisor picked `t2d-standard-8 @ us-south1-b` because it was
-the most *obtainable* spot capacity, and that same choice is what makes the run
-much cheaper than an always-on on-demand pool. The report's aggregate spot
-discount comes in below the per-node figure, and the combined savings are diluted
-by the always-on `e2-standard-4` default/system node, which runs on-demand for
-the whole window and is counted honestly rather than excluded from the bill.
+That ~86% per-node spot discount lands the two incentives on the same node pool:
+the advisor picked `t2d-standard-8 @ us-south1-b` because it was the most
+*obtainable* spot capacity, and that same choice is what makes the run cheap. The
+73.4% aggregate spot discount sits below the per-node figure because the
+always-on `e2-standard-4` default/system node runs on-demand for the whole
+window—it is counted honestly rather than excluded from the bill, which drags the
+blended rate up toward on-demand.
