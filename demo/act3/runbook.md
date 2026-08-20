@@ -8,8 +8,8 @@ from the last checkpoint, and rides a **spot → flex-start ladder** so the job
 doesn't die when spot L4s momentarily vanish. Three beats plus the ladder
 narrative: **advise (the ladder) → run → survive**, then the bill.
 
-Nothing new is introduced here; every command comes from an earlier task. Act 3
-reuses the Kueue queue, the demo bucket, and the `tune-worker` image.
+Act 3 reuses the Kueue queue, the demo bucket, and the `tune-worker` image from
+the earlier acts; no new infrastructure is introduced here.
 
 > **Where this ran.** The advisor first sited the cluster in **us-east1** (Act 2's
 > GPU-led region choice). Getting Act 3 to a verified live run then took a
@@ -86,12 +86,12 @@ Narrate the rungs (top to bottom — GKE fills the highest `priorityScore` first
   that is *not* preemptible for up to 24h. **Caveat (learned live):** on a custom
   ComputeClass this rung is **passive** — NAP retries spot on a transient
   stockout and never escalates to flex-start on its own. See "flex-start is
-  passive" below; the Plan 4 reconciler wires the escalation properly.
+  passive" below; the Act 4 reconciler wires the escalation properly.
 - **On-demand is deliberately absent.** `whenUnsatisfiable: DoNotScaleUp` means
   GKE will **never** silently fall back to full-price on-demand L4s. The ladder
   is spot-first, flex-start-as-fallback, and stops there.
 
-**Task 4 invariant — flex can never tie spot.** The flex-start rung is rendered
+**The invariant — flex can never tie spot.** The flex-start rung is rendered
 at `priorityScore: 1`, orders of magnitude below the spot rung's `1000`, so a
 scheduling tie is impossible: GKE always prefers spot when spot is available and
 only descends to flex-start when it isn't. flex-start is a fallback, never a
@@ -106,7 +106,7 @@ co-equal.
 > bigger-but-obtainable spot node when the pinned `-4` shape is dry. This rung is
 > a hand-applied deviation for the live run, comment-flagged in
 > `out/computeclass-gpu.yaml`; the advisor should learn to render shape
-> alternatives (see "Probe methodology", Plan 4).
+> alternatives (see "Probe methodology" below).
 
 ---
 
@@ -248,7 +248,7 @@ kill "$(cat .superpowers/sdd/collector-act3.pid)"
 ```
 
 Build the two-factor report. `g2` on-demand list price comes from the Cloud
-Billing Catalog (Task 3 added g2 SKUs); spot comes from the advisor's
+Billing Catalog; spot comes from the advisor's
 `capacityHistory` signal. `--interval` **must** match the collector's
 `COLLECT_INTERVAL` so node-hours are computed correctly (rows × interval):
 
@@ -310,7 +310,7 @@ teaching moment of this act:
    spot", and never escalates to the flex-start rung on its own — DWS flex-start
    via a custom compute class needs a **ProvisioningRequest**, which NAP's
    spot-retry path doesn't issue. So flex sat idle as insurance that structurally
-   *couldn't* fire. **Plan 4** fixes this by wiring a Kueue `ProvisioningRequest`
+   *couldn't* fire. **Act 4** fixes this by wiring a Kueue `ProvisioningRequest`
    admission check so the flex rung actually engages when spot is exhausted.
 7. **Probe methodology — verify capacity by probing, one shape up.** Rather than
    trust the score or migrate a *fourth* time, a **live spot-instance probe**
@@ -318,14 +318,14 @@ teaching moment of this act:
    **no `g2-standard-4`** but **`g2-standard-8` stock in `us-central1-a`** — same
    single L4, one machine size larger. We added the `g2-standard-8` spot rung
    (`priorityScore: 900`, zones a/b/c) to the live class, recreated the job, and
-   **NAP provisioned the node in ~7.5 min.** *Recommended Plan 4 advisor feature:*
+   **NAP provisioned the node in ~7.5 min.** *Recommended Act 4 advisor feature:*
    **verify-by-probe before migrating** — a cheap live probe across shapes and
    zones beats another region hop driven by a stale score, and it can surface
    "capacity exists one shape up" automatically.
 
 Every migration and probe in this saga was driven **by hand** — re-scanning,
 comparing scores to live probes, retargeting regions, and hand-adding the
-shape-alternative rung. That manual loop is exactly what **Plan 4's reconciler**
+shape-alternative rung. That manual loop is exactly what **Act 4's reconciler**
 is meant to automate: a controller that continuously reconciles advice against
 observed capacity (probe-verified), fails over on a stale prior, and adjusts the
 ladder without a human in the loop. Read this saga as a hand-run preview of that
@@ -333,7 +333,7 @@ reconciler's advisory.
 
 **The through-line:** the advisor's *region* choice and *ladder* are necessary but
 not sufficient in a real spot market. Obtainability scores age; a resilient system
-must (a) keep the spot-first ladder, (b) make flex-start actually catch (Plan 4),
+must (a) keep the spot-first ladder, (b) make flex-start actually catch (Act 4),
 and (c) confirm with a live probe rather than replan on a stale prior.
 
 ---
@@ -395,7 +395,7 @@ stalled right after issuing the preempt, and the entire survive beat was
 | 03:20:04 | **Job `Complete=True` (`CompletionsReached`)** | job condition |
 | ~03:23–03:25 | GPU node scaled back down | Compute audit `instances.delete` |
 
-### Survive-beat proof (honest finding: the preemption DID happen)
+### Proof the Preemption Happened and Training Resumed
 
 - **Job status: `succeeded=1 failed=1`.** The `failed=1` pod is the one killed by
   the preemption; the `succeeded=1` pod is the replacement that resumed and ran to
@@ -414,8 +414,7 @@ stalled right after issuing the preempt, and the entire survive beat was
   (`save_total_limit=2` pruned the earlier `-50…-200`); the max step only climbed
   across the preemption.
 
-This is a genuine survive beat — not the Act-2-by-analogy fallback. The
-preemption was issued, a pod failed, a new spot node came up, and training
+The preemption was issued, a pod failed, a new spot node came up, and training
 resumed from `checkpoint-200` and finished at step 300.
 
 ### Cost report (verbatim)
@@ -467,7 +466,7 @@ Always-on peak-sized on-demand pool for this window: $1.1342
 
 ## Teardown
 
-**Leave the cluster up.** Plan 4 (the reconciler) runs against this same
+**Leave the cluster up.** Act 4 (the reconciler) runs against this same
 `spot-demo` cluster. Tear down only when the whole demo is done:
 
 ```bash
