@@ -335,7 +335,7 @@ limit 16).
 | 16:53:50   | corpus.jsonl uploaded to `gs://example-sandbox-spot-demo/corpus/`      |
 | 17:01:15   | cost collector started (`COLLECT_INTERVAL=15`)                           |
 | 17:03:35   | `04-build.sh` exit 0 (all three images :v1)                             |
-| 17:01–17:53 | **GPU NAP troubleshooting** — pods Pending, no L4 pool (see Deviations) |
+| 17:01–17:53 | **GPU NAP troubleshooting** — pods Pending, no L4 pool (see Two Failures to Expect) |
 | 17:53:56   | single-rung `gpu:`-block `batch-gpu` ComputeClass applied               |
 | 17:54:23   | NAP created pool `nap-g2-standard-8-spot-gpu1-…` in us-east1-c          |
 | 17:57:52   | first embed pods `Running`; shards begin completing                     |
