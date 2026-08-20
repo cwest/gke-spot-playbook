@@ -112,7 +112,7 @@ helm install http-add-on kedacore/keda-add-ons-http -n keda --wait
 
 > **Finding (manifest doc fix).** `workloads/06-serve/README.md` names the chart
 > `kedacore/keda-add-on-http`; the real chart is **`kedacore/keda-add-ons-http`**
-> (plural "add-ons"), and KEDA **core** must be installed first. Corrected above.
+> (plural "add-ons"), and KEDA **core** must be installed first.
 
 Apply the product manifests. Two live substitutions/overrides, shown here rather
 than committed into the manifests:
@@ -128,10 +128,10 @@ kubectl apply -f workloads/06-serve/manifests/service.yaml
 kubectl apply -f workloads/06-serve/manifests/httpscaledobject.yaml
 ```
 
-### Finding (real product bug, fixed): `VLLM_PORT` service-link collision
+### Disable Service Links or vLLM Crashes: The `VLLM_PORT` Collision
 
 The deployment **CrashLoopBackOff'd 100% of the time** with `EngineCore failed to
-start`. The spike (a bare Pod) never hit this; the product wraps the pod in a
+start`. A bare Pod does not hit this; the product wraps the pod in a
 `Service` **named `vllm`**, so the kubelet injects
 `VLLM_PORT=tcp://34.118.234.249:8000` into the container — which collides with
 vLLM's own `VLLM_PORT` config var. The captured EngineCore root cause:
@@ -149,7 +149,7 @@ spec:
 ```
 
 With that, the pod cold-started cleanly. **Cold load, container-start → API ready
-(LIVE): 137 s** — matching the spike's 137 s almost exactly:
+(LIVE): 137 s**, broken down:
 
 | Phase | Seconds |
 | --- | --- |
@@ -160,7 +160,7 @@ With that, the pod cold-started cleanly. **Cold load, container-start → API re
 | **container start → `Application startup complete`** | **137** |
 
 Served a real request from inside the pod (probe `127.0.0.1`, not `localhost` —
-gVisor resolves `localhost` to IPv6, spike gotcha #5):
+gVisor resolves `localhost` to IPv6):
 
 ```
 POST /v1/completions {"prompt":"The capital of France is","max_tokens":12}
@@ -195,9 +195,9 @@ kubectl scale deployment/vllm -n act6-serve --replicas=1   # t0
 ```
 
 **Wake latency (LIVE): 38.8 s** (scale trigger → first `/v1/completions` 200),
-versus **137 s** cold — a **3.5×** faster wake. (The spike measured 30 s for the
-narrower *restore-trigger → 200* window; the 38.8 s here includes ReplicaSet
-recreate + scheduling onto the already-warm node.)
+versus **137 s** cold — a **3.5×** faster wake. The narrower *restore-trigger →
+200* window is ~30 s; the 38.8 s here also includes ReplicaSet recreate +
+scheduling onto the already-warm node.
 
 ### No model reload on wake — three independent proofs
 
@@ -296,7 +296,6 @@ pull, which pre-pulling / a `DaemonSet` image warmer would remove.
    `etime` = **19m59s**. Twenty minutes of process uptime in a 43-second-old
    container **on a different node in a different zone** — the snapshot persisted
    in GCS independent of the reclaimed node and rehydrated the process elsewhere.
-   This is the whole point of Act 6.
 
 ---
 
@@ -324,7 +323,7 @@ ERROR: ... not found: 404                 # snapshot bucket gone
 
 ---
 
-## Deviations & findings (evidence over assertion)
+## Requirements and Gotchas
 
 - **`enableServiceLinks: false` is mandatory** for any vLLM Deployment fronted by
   a `Service` whose name uppercases to a vLLM env var (here `vllm` → `VLLM_PORT`).
@@ -332,14 +331,12 @@ ERROR: ... not found: 404                 # snapshot bucket gone
 - **KEDA chart name** in the workload README was wrong
   (`keda-add-on-http` → `keda-add-ons-http`), and KEDA core is a prerequisite.
 - **Serving requires a dedicated manual gVisor spot pool** (`l4-gvisor-spot`)
-  because NAP-autocreated `batch-gpu` nodes are not gVisor-capable. The earlier
-  run used a sed override to target the manual pool; the committed manifest has
-  since been corrected to `cloud.google.com/gke-nodepool: l4-gvisor-spot` directly,
-  so no sed override is needed anymore.
+  because NAP-autocreated `batch-gpu` nodes are not gVisor-capable. Target the
+  manual pool directly with `cloud.google.com/gke-nodepool: l4-gvisor-spot`.
 - **The `spot-demo-serve` GSA does not exist** in the project; the KSA's Workload
   Identity annotation is therefore inert. Harmless — vLLM pulls the model from the
   HF Hub and needs no GCP credentials at runtime.
-- **gVisor drops subprocess stdout** from `kubectl logs` (spike gotcha #5): the
+- **gVisor drops subprocess stdout** from `kubectl logs`: the
   fatal EngineCore error was only recoverable via `kubectl logs --previous`
   timed right after a crash. `PYTHONUNBUFFERED=1` helps pid 1 but not children.
 - **Snapshot ⇄ Deployment tension.** `postCheckpoint: stop` stops the pod, but a

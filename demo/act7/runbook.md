@@ -12,8 +12,7 @@ with live evidence: when spot capacity is genuinely scarce, does the advisor
 to the next-cheapest region** when a zone comes back stocked out — without ever
 penalizing the evidence ledger?
 
-This is the payoff shot for the whole capacity thread (Thread 1, the SPINE):
-the mechanism proven on cheap capacity now has to earn its keep where capacity
+The mechanism proven on cheap capacity now has to earn its keep where capacity
 is genuinely scarce.
 
 > **Credentials warning (read once).** Running `kubectl`, `capacity-advisor`, or
@@ -127,7 +126,7 @@ env -u GOOGLE_APPLICATION_CREDENTIALS /tmp/capacity-advisor probe \
 
 A real `a2-highgpu-1g` (1×A100 40 GB) spot VM was allocated in `us-central1-a`,
 reached `RUNNING`, and was deleted by the probe. **Obtainability proven live on
-the hardest-to-get GPU Google sells** — this is the payoff shot. In the
+the hardest-to-get GPU Google sells.** In the
 reconciler this `RUNNING` verdict writes a 30-minute confirmation that clears the
 evidence-dry flag and widens the rung back onto the zone.
 
@@ -181,8 +180,7 @@ env -u GOOGLE_APPLICATION_CREDENTIALS /tmp/capacity-advisor analyze \
 The probe reports `obtained: false`. In the reconciler this is a pure
 absence-of-confirmation: the zone stays off the rung and region-failover
 routes onward. (A100 was obtainable in `us-central1-a` at test time — Beat 2 —
-so no organic stockout existed to capture; this is the forced fallback Casey's
-design chose.)
+so no organic stockout existed to capture, hence the forced fallback here.)
 
 **Result — LIVE region-failover ladder (2026-08-19):** `analyze` scored
 `a2-highgpu-1g` across the three regions from live capacity + spot pricing:
@@ -196,15 +194,14 @@ design chose.)
 So when the preferred region can't supply the A100, the advisor fails over to
 **`europe-west4`**, then `us-east1`. The order is **emergent from live scoring**,
 not hardcoded — `us-east1` sinks to rung 3 on its punishing preemption history
-despite matching `us-central1` on price, exactly the "ladder order is emergent"
-claim the spec made.
+despite matching `us-central1` on price.
 
 ---
 
 ## Beat 4 — ledger-boundary assertion (re-provoked live)
 
 **Intent:** After the stockout tick, confirm the probe wrote **no** ledger
-entry for the stocked-out A100 zone (the Plan-4 invariant: a failed probe is
+entry for the stocked-out A100 zone (the invariant: a failed probe is
 the *absence* of confirmation, never a penalty).
 
 **Command:**
@@ -223,7 +220,7 @@ carries an **empty ledger** while actively reconciling:
 ```
 
 `ledger.latest` is `{}` even though the reconciler applied `batch-cpu`/`batch-gpu`
-rungs today — the Plan-4 boundary (a probe outcome never writes the ledger) holds
+rungs today — the boundary that a probe outcome never writes the ledger holds
 in the live system. Two supporting facts complete the picture:
 
 - The one-shot `probe` command (Beats 2–3) is **stateless** — it takes no
