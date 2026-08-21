@@ -109,9 +109,10 @@ about the ladder.
 CronJob: [`demo/act4/runbook.md`](../demo/act4/runbook.md) walks the beats
 (deploy, hold still, read a scale-up failure without over-reading it, forget it
 on the decay curve, read stockouts on existing MIGs, and verify capacity by
-probe before widening) with the observed output. It also records the two silent
-failure modes it caught: a tick that reports success but moves nothing, and a
-tick that reports success while penalising zones that were never short.
+probe before widening) with the observed output. It also records the four silent
+failure modes it caught, among them a tick that reports success but moves
+nothing, and a tick that reports success while penalising zones that were never
+short.
 
 ## Enabling automated probing in the reconciler
 
