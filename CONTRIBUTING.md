@@ -35,7 +35,7 @@ make tools   # installs the pinned kubeconform via `go install`
 make test    # Go tests, pytest, shellcheck, and manifest validation
 ```
 
-`make tools` needs `go` (1.26+) on your PATH and installs into
+`make tools` needs `go` (1.26.5+) on your PATH and installs into
 `$(go env GOPATH)/bin`, so make sure that directory is on your PATH. On macOS or
 Linuxbrew, `brew install kubeconform shellcheck` works just as well. You also
 need `python3` for the worker test suites.

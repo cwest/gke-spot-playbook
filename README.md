@@ -69,7 +69,7 @@ Each act lives in `demo/act<N>/` with a `runbook.md`. Start with Act 1.
 
 ## Quickstart
 
-Prerequisites: a GCP project you own, `gcloud`, `kubectl`, `go` (1.26+),
+Prerequisites: a GCP project you own, `gcloud`, `kubectl`, `go` (1.26.5+),
 `python3`, `kubeconform`, and `shellcheck`.
 
 ```bash
