@@ -274,7 +274,7 @@ cost = actual ÷ 50,000.
 
 ## Teardown
 
-**Leave the cluster up.** Act 3 (Plan 4) fine-tunes on this same `spot-demo`
+**Leave the cluster up.** Act 3 fine-tunes on this same `spot-demo`
 cluster and reuses the Kueue queue, the Firestore progress table, and the demo
 bucket. Tear down only when the whole GPU arc is done:
 

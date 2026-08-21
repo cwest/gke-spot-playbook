@@ -1,7 +1,7 @@
 # Act 3 runbook — "spot survives, on the ladder"
 
 Act 2 proved a GPU embedding Job **resumes** across a spot preemption instead of
-restarting. Act 3 raises the stakes to real training: a **LoRA fine-tune of
+restarting. Act 3 moves from inference to real training: a **LoRA fine-tune of
 Gemma-2B** on `b-mc2/sql-create-context` — one L4, checkpoints on a GCS-FUSE
 mount, admitted through **Kueue** — that survives a spot preemption by resuming
 from the last checkpoint, and rides a **spot → flex-start ladder** so the job

@@ -106,9 +106,10 @@ kubectl -n default get events \
 about the ladder.
 
 **Act 4 — "the ladder maintains itself"** is the live verification of that
-CronJob: [`demo/act4/runbook.md`](../demo/act4/runbook.md) walks the four beats
+CronJob: [`demo/act4/runbook.md`](../demo/act4/runbook.md) walks the beats
 (deploy, hold still, read a scale-up failure without over-reading it, forget it
-on the decay curve) with the observed output. It also records the two silent
+on the decay curve, read stockouts on existing MIGs, and verify capacity by
+probe before widening) with the observed output. It also records the two silent
 failure modes it caught: a tick that reports success but moves nothing, and a
 tick that reports success while penalising zones that were never short.
 

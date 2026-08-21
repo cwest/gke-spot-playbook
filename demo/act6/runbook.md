@@ -319,7 +319,8 @@ ERROR: ... not found: 404                 # snapshot bucket gone
 ```
 
 **Zero `g2`/GPU instances remain**, the snapshot bucket is deleted, and the
-`spot-demo` cluster (the primary Thread-1 demo) was never touched.
+`spot-demo` cluster (the primary demo cluster the other acts share) was never
+touched.
 
 ---
 

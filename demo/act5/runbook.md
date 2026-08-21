@@ -5,7 +5,7 @@ ladder, and a reconciler maintains that ladder against live evidence — no hand
 This act asks the follow-on question: what does a denser workload look like on the
 same node, and how much value does the platform's lifecycle management unlock?
 
-This extends Thread 1 — how to build cost-efficient spot platforms — by
+This extends Acts 1–4 — how to build cost-efficient spot platforms — by
 adding a second dimension: **workload density**. A single node can pack more agents
 than it can pack generic batch jobs. An agent under GKE Agent Sandbox can suspend
 during idle periods, reclaiming its RAM footprint. With that density measured, the

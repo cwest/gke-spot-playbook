@@ -780,7 +780,7 @@ itself, and leaves the money-spending probe as an explicit human decision.
 
 ## What is deliberately out of scope
 
-**ProvisioningRequest.** Act 3's saga ends by saying "Plan 4 fixes this by
+**ProvisioningRequest.** Act 3's saga ends by saying Act 4 "fixes this by
 wiring a Kueue `ProvisioningRequest` admission check so the flex rung actually
 engages when spot is exhausted." **Act 4 does not do that**, and the promise
 should be read as retracted. `ProvisioningRequest` /
