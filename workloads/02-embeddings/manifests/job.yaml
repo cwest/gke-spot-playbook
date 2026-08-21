@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: embed
+  namespace: act2-embeddings
+spec:
+  completionMode: Indexed
+  completions: 8
+  parallelism: 2
+  backoffLimitPerIndex: 10
+  template:
+    metadata:
+      labels:
+        app: embed-worker
+    spec:
+      serviceAccountName: embed-worker
+      restartPolicy: Never
+      nodeSelector:
+        cloud.google.com/compute-class: batch-gpu
+      tolerations:
+      - key: cloud.google.com/gke-spot
+        operator: Equal
+        value: "true"
+        effect: NoSchedule
+      - key: cloud.google.com/compute-class
+        operator: Equal
+        value: batch-gpu
+        effect: NoSchedule
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+      containers:
+      - name: worker
+        # us multi-region registry: one hostname for every US region, so the
+        # image path survives a region move without a rebuild or a rewrite.
+        image: us-docker.pkg.dev/example-sandbox/spot-demo/embed-worker:v1
+        env:
+        - name: PROJECT
+          value: example-sandbox
+        - name: BUCKET
+          value: example-sandbox-spot-demo
+        - name: MODEL_VERSION
+          value: bge-base-en-v1.5-1
+        - name: SHARDS
+          value: "8"
+        resources:
+          requests:
+            cpu: "3"
+            memory: 12Gi
+            nvidia.com/gpu: "1"
+          limits:
+            memory: 12Gi
+            nvidia.com/gpu: "1"

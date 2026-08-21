@@ -1,0 +1,28 @@
+# Act 7 — obtainability under GPU scarcity. A100 (a2-highgpu-1g) across a
+# three-region ladder with automated live probing. The ladder ORDER is emergent
+# from the advisor's composite score (which weights spot $/unit); this file only
+# declares the candidate regions. NETWORK/SUBNET must match the reconciler's VPC
+# or a wrong network reads as a false stockout. Fill in the full resource paths
+# for the live run.
+project: example-sandbox
+allowedRegions: ["us-central1", "us-east1", "europe-west4"]
+profiles:
+  gpu-a100:
+    kind: gpu
+    machineTypes: [a2-highgpu-1g]
+    size: 1
+scoring:
+  priceExponent: 1.0
+  maxHourlyUSDPerUnit: 0 # 0 = disabled
+evidence:
+  halfLifeMinutes: 30
+  floor: 0.05
+  dryBelow: 0.5
+  maxAgeHours: 6
+  fastPathTicks: 1
+probe:
+  enabled: true
+  automated: true
+  maxRunDurationSeconds: 300
+  # network: projects/example-sandbox/global/networks/default
+  # subnet:  projects/example-sandbox/regions/us-central1/subnetworks/default

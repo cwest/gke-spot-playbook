@@ -1,0 +1,12 @@
+{
+  "machineType": "n2-standard-32",
+  "location": "https://compute.googleapis.com/compute/beta/projects/p/zones/us-central1-a",
+  "preemptionHistory": [
+    {"interval": {"startTime": "2026-04-20T07:00:00Z", "endTime": "2026-04-21T07:00:00Z"}, "preemptionRate": 0.52},
+    {"interval": {"startTime": "2026-04-21T07:00:00Z", "endTime": "2026-04-22T07:00:00Z"}, "preemptionRate": 0.31}
+  ],
+  "priceHistory": [
+    {"interval": {"startTime": "2026-04-27T07:00:00Z", "endTime": "2026-05-11T07:00:00Z"},
+     "listPrice": {"currencyCode": "USD", "nanos": 478720000}}
+  ]
+}

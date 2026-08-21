@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: act5-agents
+  labels:
+    team: spot-demo
+    act: agents

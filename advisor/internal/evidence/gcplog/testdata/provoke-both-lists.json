@@ -1,0 +1,75 @@
+{
+  "noDecisionStatus": {
+    "measureTime": "1785699485",
+    "noScaleUp": {
+      "unhandledPodGroups": [
+        {
+          "napFailureReasons": [
+            {
+              "messageId": "no.scale.up.nap.pod.zonal.resources.exceeded",
+              "parameters": [
+                "us-central1-a"
+              ]
+            },
+            {
+              "messageId": "no.scale.up.nap.pod.zonal.resources.exceeded",
+              "parameters": [
+                "us-central1-b"
+              ]
+            },
+            {
+              "messageId": "no.scale.up.nap.pod.zonal.resources.exceeded",
+              "parameters": [
+                "us-central1-c"
+              ]
+            },
+            {
+              "messageId": "no.scale.up.nap.pod.zonal.resources.exceeded",
+              "parameters": [
+                "us-central1-f"
+              ]
+            }
+          ],
+          "podGroup": {
+            "samplePod": {
+              "name": "provoke-noscaleup",
+              "namespace": "spot-demo"
+            },
+            "totalPodCount": 1
+          },
+          "rejectedMigs": [
+            {
+              "mig": {
+                "name": "gke-spot-demo-nap-t2d-standard-8-spot-4eb946e7-grp",
+                "nodepool": "nap-t2d-standard-8-spot-tnq5qvem",
+                "zone": "us-central1-c"
+              },
+              "reason": {
+                "messageId": "no.scale.up.mig.failing.predicate",
+                "parameters": [
+                  "NodeResourcesFit",
+                  "Insufficient cpu"
+                ]
+              }
+            },
+            {
+              "mig": {
+                "name": "gke-spot-demo-nap-t2d-standard-8-spot-67640a5e-grp",
+                "nodepool": "nap-t2d-standard-8-spot-tnq5qvem",
+                "zone": "us-central1-b"
+              },
+              "reason": {
+                "messageId": "no.scale.up.mig.failing.predicate",
+                "parameters": [
+                  "NodeResourcesFit",
+                  "Insufficient cpu"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "unhandledPodGroupsTotalCount": 1
+    }
+  }
+}

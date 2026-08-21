@@ -1,0 +1,90 @@
+# THROWAWAY spike manifest (Act 6 Task 1). NOT the product path.
+# A single vLLM pod serving Qwen/Qwen2.5-3B-Instruct on one L4, under gVisor,
+# so a GKE GPU Pod snapshot can checkpoint the warm VRAM/CUDA state.
+#
+# Design notes that make GPU checkpoint/restore actually work here:
+#  - runtimeClassName: gvisor            -> required; nvproxy bridges CUDA calls
+#  - --enforce-eager                     -> no CUDA-graph capture (simpler to
+#                                           checkpoint under gVisor; faster start)
+#  - --gpu-memory-utilization 0.5        -> keep the VRAM allocation small so the
+#                                           cuda-checkpoint serialization into host
+#                                           RAM fits comfortably on g2-standard-8
+#  - memory limit 26Gi                   -> headroom for VRAM-into-host-RAM on
+#                                           checkpoint (VRAM is copied into the
+#                                           process memory during snapshot)
+#  - label app: vllm-spike               -> targeted by the PodSnapshotPolicy
+apiVersion: v1
+kind: Pod
+metadata:
+  name: vllm-spike
+  namespace: act6-spike
+  labels:
+    app: vllm-spike
+spec:
+  runtimeClassName: gvisor
+  nodeSelector:
+    # Spot L4 gVisor pool (--spot, per the brief). During this spike, on-demand
+    # g2/L4 was region-stocked-out across us-central1 zones while spot had
+    # capacity, so spot was in fact the only way to get an L4 node. Because a
+    # PodSnapshot persists in GCS independent of node lifetime, snapshot/restore
+    # survives a spot preemption between checkpoint and restore.
+    cloud.google.com/gke-nodepool: l4-spot
+  tolerations:
+    - key: nvidia.com/gpu
+      operator: Exists
+      effect: NoSchedule
+    - key: sandbox.gke.io/runtime
+      operator: Equal
+      value: gvisor
+      effect: NoSchedule
+    - key: cloud.google.com/gke-spot
+      operator: Equal
+      value: "true"
+      effect: NoSchedule
+  containers:
+    - name: vllm
+      image: vllm/vllm-openai:latest
+      # The vLLM latest image is built against a newer CUDA than GKE's DEFAULT L4
+      # driver (535 / CUDA 12.2) supports, so the node pool MUST be created with
+      # gpu-driver-version=latest (installs 580 / CUDA 13-capable). See the env
+      # note below re: NOT enabling CUDA forward-compat on top of that driver.
+      env:
+        # Force unbuffered stdout so vLLM's startup + serving logs flush promptly
+        # under gVisor -- needed to time readiness and to PROVE no model reload on
+        # restore (the absence of "Loading weights" lines is the evidence).
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        # NOTE: do NOT set VLLM_ENABLE_CUDA_COMPATIBILITY here. With the
+        # gpu-driver-version=latest driver (580 / CUDA 13-capable) the CUDA
+        # forward-compat libraries conflict with the already-new-enough driver
+        # and cause CUDA error 803 (cudaErrorSystemDriverMismatch) at init_device.
+      args:
+        - "--model"
+        - "Qwen/Qwen2.5-3B-Instruct"
+        - "--host"
+        - "0.0.0.0"
+        - "--port"
+        - "8000"
+        - "--max-model-len"
+        - "8192"
+        - "--gpu-memory-utilization"
+        - "0.5"
+        - "--enforce-eager"
+      ports:
+        - containerPort: 8000
+      resources:
+        requests:
+          cpu: "2"
+          memory: 8Gi
+          nvidia.com/gpu: "1"
+        limits:
+          memory: 26Gi
+          nvidia.com/gpu: "1"
+      volumeMounts:
+        - name: dshm
+          mountPath: /dev/shm
+  volumes:
+    - name: dshm
+      emptyDir:
+        medium: Memory
+        sizeLimit: 4Gi

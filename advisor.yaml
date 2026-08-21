@@ -1,0 +1,41 @@
+project: example-sandbox
+allowedRegions: ["us"]
+profiles:
+  cpu-batch:
+    kind: cpu
+    machineTypes: [e2-standard-8, n2-standard-8, t2d-standard-8]
+    size: 20
+  gpu-batch:
+    kind: gpu
+    machineTypes: [g2-standard-4, g2-standard-8, g2-standard-24]
+    size: 4
+  gpu-a100:
+    kind: gpu
+    machineTypes: [a2-highgpu-1g]
+    size: 1
+hysteresis:
+  minScoreDelta: 0.15
+  consecutiveTicks: 3
+caps:
+  maxSpotRungs: 3
+scoring:
+  priceExponent: 1.0
+  maxHourlyUSDPerUnit: 0 # 0 = disabled
+# Observed provisioning failures decay exponentially. A failure drops the
+# affected shape+zone to `floor` immediately; it recovers toward 1.0 with the
+# given half-life and is ignored entirely past maxAgeHours. Rungs whose factor
+# is below dryBelow are treated as unavailable and trigger zone widening.
+evidence:
+  halfLifeMinutes: 30
+  floor: 0.05
+  dryBelow: 0.5
+  maxAgeHours: 6
+  # Evidence-driven changes skip the normal hysteresis wait: a zone that just
+  # refused a node should not take 30 minutes to fall off the ladder.
+  fastPathTicks: 1
+# The live capacity probe creates one real spot VM to verify a zone can
+# actually supply a shape. Off by default — it costs money. maxRunDurationSeconds
+# is a GCE-side backstop so an abandoned probe VM terminates itself.
+probe:
+  enabled: false
+  maxRunDurationSeconds: 300

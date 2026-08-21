@@ -1,0 +1,93 @@
+# vLLM Serving Deployment on Spot GPU
+# Serves Qwen/Qwen2.5-3B-Instruct via OpenAI-compatible API on port 8000.
+# Runs under gVisor for isolation and checkpoint/restore support.
+# Memory limits sized generously to accommodate VRAM serialization overhead.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm
+  namespace: act6-serve
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm-server
+  template:
+    metadata:
+      labels:
+        app: vllm-server
+    spec:
+      serviceAccountName: vllm-server
+      # Disable Kubernetes service-link env injection. The Service is named
+      # "vllm", so the kubelet injects VLLM_PORT=tcp://<clusterIP>:8000 into the
+      # container, which collides with vLLM's own VLLM_PORT config variable and
+      # crashes EngineCore at startup ("VLLM_PORT '...' appears to be a URI").
+      # Proven live in Act 6 Beat 1 — without this the pod CrashLoopBackOffs 100%.
+      enableServiceLinks: false
+      runtimeClassName: gvisor
+      nodeSelector:
+        cloud.google.com/gke-nodepool: l4-gvisor-spot
+      tolerations:
+      - key: cloud.google.com/gke-spot
+        operator: Equal
+        value: "true"
+        effect: NoSchedule
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+      containers:
+      - name: vllm
+        image: vllm/vllm-openai:latest
+        env:
+        # Force unbuffered stdout so vLLM logs flush promptly under gVisor.
+        # Critical for timing readiness and proving no model reload on restore.
+        - name: PYTHONUNBUFFERED
+          value: "1"
+        args:
+        - --model
+        - Qwen/Qwen2.5-3B-Instruct
+        - --host
+        - "0.0.0.0"
+        - --port
+        - "8000"
+        - --max-model-len
+        - "8192"
+        # Keep VRAM allocation modest so checkpoint serialization into host RAM
+        # fits comfortably. Spike proved 0.5 works with 26Gi memory limit.
+        - --gpu-memory-utilization
+        - "0.5"
+        # Disable CUDA graph capture for simpler checkpoint under gVisor and faster start.
+        - --enforce-eager
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 3
+        resources:
+          requests:
+            cpu: "3"
+            # Memory request sized for model VRAM plus gVisor checkpoint serialization
+            # overhead. Spike proved 26Gi necessary: checkpoint copies VRAM into process
+            # memory before uploading to GCS. With gpu-memory-utilization 0.5 (~4GB VRAM
+            # for this model), 26Gi provides safe headroom for the serialization.
+            memory: 26Gi
+            nvidia.com/gpu: "1"
+          limits:
+            memory: 26Gi
+            nvidia.com/gpu: "1"
+        volumeMounts:
+        - name: dshm
+          mountPath: /dev/shm
+      volumes:
+      - name: dshm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 4Gi

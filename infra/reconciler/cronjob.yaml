@@ -1,0 +1,72 @@
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: capacity-advisor
+  namespace: spot-demo
+spec:
+  schedule: "*/10 * * * *"
+  # Forbid, not Replace: a tick that overruns is still holding a consistent view
+  # of state, and two concurrent server-side applies would fight each other.
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 300
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          serviceAccountName: capacity-advisor
+          restartPolicy: Never
+          # The reconciler must run somewhere stable. Pinning it off spot keeps
+          # a preemption from silently skipping ticks during the demo.
+          nodeSelector:
+            cloud.google.com/gke-provisioning: standard
+          securityContext:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+          - name: capacity-advisor
+            image: IMAGE_PLACEHOLDER
+            # :v1 is a mutable tag that 04-build.sh overwrites on every build,
+            # but Kubernetes defaults any tag other than :latest to
+            # IfNotPresent. A node that has already pulled :v1 would then keep
+            # running the old binary forever, and the tick would look healthy
+            # while ignoring the fix you just shipped. Always costs one registry
+            # round-trip every ten minutes.
+            imagePullPolicy: Always
+            args:
+            - reconcile
+            - --config=/etc/advisor/advisor.yaml
+            - --profiles=cpu-batch,gpu-batch
+            env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: PROJECT_ID
+              value: PROJECT_PLACEHOLDER_ID
+            - name: CLUSTER_REGION
+              value: REGION_PLACEHOLDER
+            - name: CLUSTER_NAME
+              value: CLUSTER_PLACEHOLDER
+            - name: STATE_NAME
+              value: capacity-advisor-state
+            volumeMounts:
+            - name: config
+              mountPath: /etc/advisor
+              readOnly: true
+            resources:
+              requests: {cpu: 100m, memory: 128Mi}
+              limits: {memory: 256Mi}
+            securityContext:
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+              capabilities:
+                drop: ["ALL"]
+          volumes:
+          - name: config
+            configMap:
+              name: capacity-advisor-config

@@ -1,0 +1,17 @@
+{
+  "decision": {
+    "eventId": "b1f2c3d4-1111-2222-3333-444455556666",
+    "scaleUp": {
+      "increasedMigs": [
+        {
+          "mig": {
+            "name": "gke-spot-demo-nap-g2-standard-4-spot-a1b2c3d4-grp",
+            "nodepool": "nap-g2-standard-4-spot-a1b2c3d4",
+            "zone": "us-central1-a"
+          },
+          "requestedNodes": 1
+        }
+      ]
+    }
+  }
+}
