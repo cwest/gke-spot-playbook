@@ -1,11 +1,11 @@
 # Act 6 runbook — "serving on spot, warm and cheap"
 
-Acts 1–4 proved the platform survives spot preemption on a compute-class ladder;
+Acts 1–4 proved the platform survives [spot preemption](https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) on a [compute-class](https://cloud.google.com/kubernetes-engine/docs/concepts/about-custom-compute-classes?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) ladder;
 Act 5 measured how densely one node can pack agents by *suspending* idle ones.
 Act 6 turns that same lifecycle lever on a **latency-sensitive serving** workload:
-a vLLM OpenAI-compatible endpoint on a single spot L4, made cheap by **snapshot-
-backed scale-to-zero** and made resilient by the fact that a GKE Pod snapshot
-lives in GCS, independent of the node that made it.
+a vLLM OpenAI-compatible endpoint on a single spot [L4](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab), made cheap by **snapshot-
+backed scale-to-zero** and made resilient by the fact that a [GKE Pod snapshot](https://cloud.google.com/kubernetes-engine/docs/concepts/pod-snapshots?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab)
+lives in [GCS](https://cloud.google.com/storage/docs/introduction?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab), independent of the node that made it.
 
 The question this act answers with live evidence: can you scale an LLM server to
 **zero** when idle (paying nothing), wake it **without reloading the model**, and
@@ -59,7 +59,7 @@ GCS.
 ## Environment (all live, `example-sandbox`, `us-central1`)
 
 - Cluster `act6-serve`, GKE **`1.36.2-gke.2064000`** (rapid channel), regional,
-  base pool `e2-standard-4`. **Pod snapshots** enabled; **Workload Identity**
+  base pool `e2-standard-4`. **Pod snapshots** enabled; **[Workload Identity](https://cloud.google.com/kubernetes-engine/docs/concepts/workload-identity?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab)**
   (`example-sandbox.svc.id.goog`) enabled first as the hard prerequisite.
 - GPU node pool `l4-gvisor-spot`: `g2-standard-8` + 1× `nvidia-l4`, `--spot`,
   `--sandbox type=gvisor`, **`gpu-driver-version=latest`** (measured driver
@@ -169,7 +169,7 @@ POST /v1/completions {"prompt":"The capital of France is","max_tokens":12}
 
 **Scale to zero (LIVE):** after snapshotting the warm pod (Beat 2), `kubectl scale
 deployment/vllm --replicas=0` released the pod; the spot L4 node drained and the
-autoscaler returned the pool to 0. Idle cost → $0 (KEDA drives this same 1→0 on
+[autoscaler](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) returned the pool to 0. Idle cost → $0 (KEDA drives this same 1→0 on
 `scaledownPeriod: 300` in production).
 
 ---

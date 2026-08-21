@@ -1,6 +1,6 @@
 # vLLM Serving on Spot GPU with Snapshot-Backed Scale-to-Zero
 
-This workload serves [Qwen/Qwen2.5-3B-Instruct](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct) via an OpenAI-compatible API endpoint on Spot L4 GPUs under gVisor. It uses **GKE Pod snapshots** to checkpoint warm GPU VRAM/CUDA state to GCS, enabling fast restore-from-snapshot on scale-up (0→1) instead of cold model load, and **KEDA HTTP add-on** to scale to zero during idle periods.
+This workload serves [Qwen/Qwen2.5-3B-Instruct](https://huggingface.co/Qwen/Qwen2.5-3B-Instruct) via an OpenAI-compatible API endpoint on Spot L4 GPUs under [gVisor](https://cloud.google.com/kubernetes-engine/docs/concepts/sandbox-pods?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab). It uses [**GKE Pod snapshots**](https://cloud.google.com/kubernetes-engine/docs/concepts/pod-snapshots?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) to checkpoint warm GPU VRAM/CUDA state to GCS, enabling fast restore-from-snapshot on scale-up (0→1) instead of cold model load, and **KEDA HTTP add-on** to scale to zero during idle periods.
 
 ## Performance
 
@@ -17,9 +17,9 @@ The snapshot captures the entire warm state (VRAM, CUDA context, host memory) to
 
 Before applying these manifests, ensure the following infrastructure is in place:
 
-1. **GKE cluster with Pod snapshots enabled** (see `infra/serving/snapshot-storage.md` for exact setup order — Workload Identity is a hard prerequisite).
-2. **Snapshot storage bucket created** (see `infra/serving/snapshot-storage.md` for bucket creation with HNS and soft-delete settings) and **IAM configured** via `infra/09-serving-iam.sh` (grants `roles/storage.admin` to the gkenode service agent; does NOT create the bucket).
-3. **GPU node pool** with gVisor and L4 GPUs (`infra/09-serving-nodepool.sh`).
+1. **GKE cluster with Pod snapshots enabled** (see `infra/serving/snapshot-storage.md` for exact setup order—[Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) is a hard prerequisite).
+2. **Snapshot storage bucket created** (see `infra/serving/snapshot-storage.md` for bucket creation with HNS and soft-delete settings) and **IAM configured** via `infra/09-serving-iam.sh` (grants [`roles/storage.admin`](https://cloud.google.com/storage/docs/access-control/iam-roles?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) to the gkenode service agent; does NOT create the bucket).
+3. **GPU node pool** with gVisor and [L4 GPUs](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) (`infra/09-serving-nodepool.sh`).
 4. **KEDA core and HTTP add-on installed**:
 
    ```bash

@@ -1,12 +1,12 @@
 # Act 5 runbook — "how dense can one node get"
 
-Acts 1–4 proved the platform: workloads survive spot preemption on a compute-class
+Acts 1–4 proved the platform: workloads survive [spot preemption](https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) on a [compute-class](https://cloud.google.com/kubernetes-engine/docs/concepts/about-custom-compute-classes?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab)
 ladder, and a reconciler maintains that ladder against live evidence — no hand edits.
 This act asks the follow-on question: what does a denser workload look like on the
 same node, and how much value does the platform's lifecycle management unlock?
 
 This act adds a second dimension: **workload density**. A single node can pack more agents
-than it can pack generic batch jobs. An agent under GKE Agent Sandbox can suspend
+than it can pack generic batch jobs. An agent under [GKE Agent Sandbox](https://cloud.google.com/kubernetes-engine/docs/how-to/agent-sandbox?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) can suspend
 during idle periods, reclaiming its RAM footprint. With that density measured, the
 platform's cost advantage becomes precise: a metric not just of cheaper compute,
 but of how many workloads you can run per dollar on that compute.
@@ -89,10 +89,10 @@ actually scheduled at the wall is P1, the baseline packing density. A bounded
 ## The Mechanism, Proven End to End (Live Run, 2026-08-12)
 
 The live run was executed on a dedicated `--enable-pod-snapshots` cluster
-(`agent5-snap`, GKE 1.36.2-gke.2281000) with a gVisor node pool
-(`n2-standard-4`) and a GCS snapshot bucket. The pod-snapshot CRDs come from the
-cluster flag itself — the OSS `agent-sandbox` controller is **not** required for
-GKE Pod snapshots (it only adds the `SandboxClaim`/`SandboxTemplate` abstraction
+(`agent5-snap`, GKE 1.36.2-gke.2281000) with a [gVisor](https://cloud.google.com/kubernetes-engine/docs/concepts/sandbox-pods?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) node pool
+(`n2-standard-4`) and a [GCS](https://cloud.google.com/storage/docs/introduction?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) snapshot bucket. The pod-snapshot CRDs come from the
+cluster flag itself—the OSS `agent-sandbox` controller is **not** required for
+[GKE Pod snapshots](https://cloud.google.com/kubernetes-engine/docs/concepts/pod-snapshots?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) (it only adds the `SandboxClaim`/`SandboxTemplate` abstraction
 on top). All infrastructure was torn down after capture.
 
 ### The headline: lossless suspend → resume works
@@ -276,4 +276,3 @@ can afford the cost of an agent restart more often, and pack denser as a result.
   `kubectl describe node`. `kubectl top node` reports memory *used* (not
   available), so it is deliberately not used for this figure — reporting "used"
   as "available" would be wrong.
-

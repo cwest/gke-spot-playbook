@@ -1,11 +1,11 @@
 # GKE Pod Snapshots — Setup for LLM Serving (Act 6)
 
-This document covers enabling GKE Pod snapshots for GPU workloads, configuring
+This document covers enabling [GKE Pod snapshots](https://cloud.google.com/kubernetes-engine/docs/concepts/pod-snapshots?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) for GPU workloads, configuring
 snapshot storage, and the version-matching requirements for successful restore.
 
 ## Prerequisites (Critical Ordering)
 
-**IMPORTANT:** Workload Identity is a **hard prerequisite** for Pod snapshots.
+**IMPORTANT:** [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) is a **hard prerequisite** for Pod snapshots.
 Enabling `--enable-pod-snapshots` at cluster-create time without a workload pool
 fails with an opaque `Internal error` during `CLUSTER_CONFIGURING`.
 
@@ -49,7 +49,7 @@ gcloud container clusters update <CLUSTER_NAME> \
 
 ## Snapshot Storage Bucket
 
-Create a GCS bucket with Hierarchical Namespace (HNS) enabled and soft-delete
+Create a [GCS bucket](https://cloud.google.com/storage/docs?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) with [Hierarchical Namespace (HNS)](https://cloud.google.com/storage/docs/hns-overview?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) enabled and soft-delete
 disabled (snapshot images are large; soft-delete doubles storage cost).
 
 The bucket name typically follows the pattern `<PROJECT>-act6-snap` (e.g.,
@@ -71,7 +71,7 @@ for managed identity), the checkpoint image is written to GCS by the **gkenode
 service agent** (`service-<PROJECT_NUMBER>@gcp-sa-gkenode.iam.gserviceaccount.com`),
 **NOT** the container-engine-robot service account.
 
-The gkenode SA must hold `roles/storage.admin` on the snapshot bucket. Grant it:
+The gkenode SA must hold [`roles/storage.admin`](https://cloud.google.com/storage/docs/access-control/iam-roles?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) on the snapshot bucket. Grant it:
 
 ```bash
 PROJECT_NUMBER=$(gcloud projects describe <PROJECT> --format='value(projectNumber)')
@@ -130,7 +130,7 @@ creation to simplify this matching.
 
 ## GPU Driver Version
 
-For GPU workloads (e.g., vLLM serving), use `gpu-driver-version=latest` when
+For [GPU workloads](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) (e.g., vLLM serving), use `gpu-driver-version=latest` when
 creating the node pool. GKE's default L4 driver (535 / CUDA 12.2) is too old for
 current `vllm/vllm-openai:latest` images, which require CUDA 13-capable drivers.
 The `latest` driver installs version 580.x (CUDA 13-capable).

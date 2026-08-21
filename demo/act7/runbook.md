@@ -1,12 +1,12 @@
 # Act 7 runbook — "obtainability under GPU scarcity"
 
-Acts 1–6 proved the advisor survives spot preemption, scales workloads across a
+Acts 1–6 proved the advisor survives [spot preemption](https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab), scales workloads across a
 cost ladder, gates rung widening on live capacity probes, and scales an LLM
 endpoint to zero with snapshot-backed warm recovery. All on cheap, plentiful
 capacity — L4, e2, n1.
 
 Act 7 turns that same probe machinery on the **hardest-to-get GPU Google
-sells**: the A100 (`a2-highgpu-1g`, 1×A100 40GB). The question this act answers
+sells**: the [A100](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) (`a2-highgpu-1g`, 1×A100 40GB). The question this act answers
 with live evidence: when spot capacity is genuinely scarce, does the advisor
 **confirm obtainability by live probe before widening**, and does it **fail over
 to the next-cheapest region** when a zone comes back stocked out — without ever
@@ -62,8 +62,8 @@ flowchart TD
 
 ## Prerequisites
 
-Before running the LIVE beats, confirm spot/preemptible A100 quota in at least
-one ladder region:
+Before running the LIVE beats, confirm spot/preemptible A100 [quota](https://cloud.google.com/docs/quotas/overview?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) in at least
+one ladder [region](https://cloud.google.com/compute/docs/regions-zones?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab):
 
 ```bash
 env -u GOOGLE_APPLICATION_CREDENTIALS gcloud compute regions describe us-central1 \

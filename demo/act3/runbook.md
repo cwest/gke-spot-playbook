@@ -2,7 +2,7 @@
 
 Act 2 proved a GPU embedding Job **resumes** across a spot preemption instead of
 restarting. Act 3 moves from inference to real training: a **LoRA fine-tune of
-Gemma-2B** on `b-mc2/sql-create-context` — one L4, checkpoints on a GCS-FUSE
+Gemma-2B** on `b-mc2/sql-create-context` — one L4, checkpoints on a [GCS-FUSE](https://cloud.google.com/kubernetes-engine/docs/how-to/persistent-volumes/cloud-storage-fuse-csi-driver?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab)
 mount, admitted through **Kueue** — that survives a spot preemption by resuming
 from the last checkpoint, and rides a **spot → flex-start ladder** so the job
 doesn't die when spot L4s momentarily vanish. Three beats plus the ladder
@@ -41,7 +41,7 @@ test -s ~/.cache/huggingface/token && echo "HF token present" || echo "MISSING"
 If missing, run `huggingface-cli login` (or export `HF_TOKEN`) and accept the
 license at https://huggingface.co/google/gemma-2b before continuing.
 
-Prereqs: `gcloud` (authed ADC on `example-sandbox`), `kubectl`, `go`,
+Prereqs: [`gcloud`](https://cloud.google.com/sdk/gcloud?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) (authed ADC on `example-sandbox`), `kubectl`, `go`,
 `shellcheck`; run from the repo root. `spot-demo` cluster up with Kueue +
 `gpu-cq` installed and the `tune-worker:v1` image in Artifact Registry.
 
@@ -82,7 +82,7 @@ Narrate the rungs (top to bottom — GKE fills the highest `priorityScore` first
   capacity.
 - **flex-start rung** (`priorityScore: 1`, `flexStart.enabled: true`,
   `maxRunDurationSeconds: 86400`). When spot L4s momentarily vanish, the *intent*
-  is that GKE falls to **Dynamic Workload Scheduler flex-start** — L4 capacity
+  is that GKE falls to **[Dynamic Workload Scheduler](https://cloud.google.com/kubernetes-engine/docs/how-to/dws-flex-start-training?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) flex-start** — L4 capacity
   that is *not* preemptible for up to 24h. **Caveat (learned live):** on a custom
   ComputeClass this rung is **passive** — NAP retries spot on a transient
   stockout and never escalates to flex-start on its own. See "flex-start is
@@ -122,7 +122,7 @@ COLLECT_INTERVAL=15 bash demo/cost/collector.sh out/cost-samples-act3.csv &
 echo $! > .superpowers/sdd/collector-act3.pid
 ```
 
-Apply the namespace, service account (Workload Identity → `spot-demo-tune` GSA),
+Apply the namespace, service account ([Workload Identity](https://cloud.google.com/kubernetes-engine/docs/concepts/workload-identity?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) → `spot-demo-tune` GSA),
 and the Kueue LocalQueue:
 
 ```bash
@@ -232,7 +232,7 @@ the recovery point; the spot preemption costs a bounded sliver, not a restart.
 > **If pod logs are already gone** (node deleted, job finished), the survive beat
 > is still fully reconstructable from durable evidence: `kubectl get job ... -o
 > yaml` (`succeeded=1 failed=1` ⇒ one pod died, one completed), and the
-> `k8s_container` `trainer` logs in **Cloud Logging** retain both
+> `k8s_container` `trainer` logs in **[Cloud Logging](https://cloud.google.com/logging/docs?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab)** retain both
 > `resume_from_checkpoint` lines and the LR-continuous loss curve after the pod
 > is gone. See the verified run below for exactly this reconstruction.
 
@@ -247,9 +247,9 @@ scaled back down (a couple of minutes of cool-down), stop the collector:
 kill "$(cat .superpowers/sdd/collector-act3.pid)"
 ```
 
-Build the two-factor report. `g2` on-demand list price comes from the Cloud
-Billing Catalog; spot comes from the advisor's
-`capacityHistory` signal. `--interval` **must** match the collector's
+Build the two-factor report. `g2` on-demand list price comes from the [Cloud
+Billing Catalog](https://cloud.google.com/billing/v1/how-tos/catalog-api?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab); spot comes from the advisor's
+[`capacityHistory`](https://cloud.google.com/sdk/gcloud/reference/beta/compute/advice/capacity-history?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) signal. `--interval` **must** match the collector's
 `COLLECT_INTERVAL` so node-hours are computed correctly (rows × interval):
 
 ```bash
@@ -308,7 +308,7 @@ teaching moment of this act:
 6. **flex-start is passive.** The ladder's flex-start rung did **not** rescue the
    run. On a custom ComputeClass, NAP treats a transient spot stockout as "retry
    spot", and never escalates to the flex-start rung on its own — DWS flex-start
-   via a custom compute class needs a **ProvisioningRequest**, which NAP's
+   via a custom compute class needs a **[ProvisioningRequest](https://cloud.google.com/kubernetes-engine/docs/how-to/provisioningrequest?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab)**, which NAP's
    spot-retry path doesn't issue. So flex sat idle as insurance that structurally
    *couldn't* fire. **Act 4** fixes this by wiring a Kueue `ProvisioningRequest`
    admission check so the flex rung actually engages when spot is exhausted.

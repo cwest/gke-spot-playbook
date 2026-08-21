@@ -79,7 +79,7 @@ move.
 
 ## Installing the capacity reconciler
 
-The capacity reconciler rescores the ComputeClass ladders from live capacity
+The capacity reconciler rescores the [ComputeClass](https://cloud.google.com/kubernetes-engine/docs/concepts/about-custom-compute-classes?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) ladders from live capacity
 advice and observed scale-up failures. It runs as a CronJob every 10 minutes,
 server-side applying cluster-scoped ComputeClasses with no human in the loop.
 Install it by running:
@@ -116,7 +116,7 @@ short.
 
 ## Enabling automated probing in the reconciler
 
-By default, the reconciler is read-only in GCP (roles `compute.viewer` and
+By default, the reconciler is read-only in GCP (roles [`compute.viewer`](https://cloud.google.com/iam/docs/roles-permissions/compute?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) and
 `logging.viewer`). To enable automated probing, set `PROBE_AUTOMATED=true` when
 running the reconciler installer:
 
