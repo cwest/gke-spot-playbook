@@ -1,7 +1,7 @@
 # capacity-advisor
 
-`capacity-advisor` queries the Compute Engine capacity-advice beta APIs to score
-Spot VM candidates across the regions and machine types you care about, then
+`capacity-advisor` queries the Compute Engine [capacity-advice beta APIs](https://cloud.google.com/compute/docs/reference/rest/beta/advice/capacity?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) to score
+[Spot VM](https://cloud.google.com/compute/docs/instances/spot?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) candidates across the regions and machine types you care about, then
 renders GKE artifacts from the result: a ComputeClass ladder of fallback rungs, a
 human-readable ranking report, and a `cluster-config.env` you can source when
 creating a cluster. It ranks candidates by a composite of obtainability,
@@ -11,8 +11,8 @@ durable, cheapest Spot capacity instead of guessing.
 ## Prerequisites
 
 - A GCP project with the **Compute Engine API** enabled.
-- Credentials with at least **`roles/compute.viewer`** on that project.
-- Application Default Credentials configured locally:
+- Credentials with at least [**`roles/compute.viewer`**](https://cloud.google.com/iam/docs/roles-permissions/compute?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) on that project.
+- [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) configured locally:
 
   ```bash
   gcloud auth application-default login

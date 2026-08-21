@@ -1,6 +1,6 @@
 # Act 6 Task 1 — GPU snapshot/restore feasibility spike (HARD GATE)
 
-**Question:** does a GKE GPU Pod snapshot/restore of a *warm* vLLM pod resume the
+**Question:** does a GKE GPU [Pod snapshot](https://cloud.google.com/kubernetes-engine/docs/concepts/pod-snapshots?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab)/restore of a *warm* vLLM pod resume the
 model from VRAM and come back **materially faster than a cold model load**, with
 **no model reload**? If yes → GO (build Act 6 on snapshot-backed scale-to-zero).
 If no → rescope to honest cold start.
@@ -25,7 +25,7 @@ Both conditions for GO are met.
   `us-central1-a`.
 - **Pod snapshots** enabled (`--enable-pod-snapshots`) — see the hard-won
   prerequisites below.
-- GPU node pool `l4-spot`: `g2-standard-8` + 1× `nvidia-l4`, `--spot`,
+- GPU node pool `l4-spot`: `g2-standard-8` + 1× [`nvidia-l4`](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab), `--spot`,
   `--sandbox type=gvisor`, **`gpu-driver-version=latest`** (580.126.20).
 - Snapshot bucket `gs://example-sandbox-act6-snap` (HNS on, soft-delete off),
   with `roles/storage.admin` granted to the `gcp-sa-gkenode` service agent.

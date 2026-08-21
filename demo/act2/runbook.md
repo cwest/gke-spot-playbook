@@ -1,7 +1,7 @@
 # Act 2 runbook — "spot survives, with GPUs"
 
 Act 1 proved a Pub/Sub queue drains through a spot preemption without losing a
-task. Act 2 raises the stakes: a GPU embedding **Job** — real `g2` L4 accelerators,
+task. Act 2 raises the stakes: a GPU embedding **Job** — real [`g2` L4](https://cloud.google.com/compute/docs/accelerator-optimized-machines?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) accelerators,
 real model weights, real checkpointed progress — that **resumes** across a spot
 preemption instead of restarting. Same three beats plus a migration:
 **advise (GPU-led) → migrate → provision/run → survive**, then a zero-regression
@@ -15,7 +15,7 @@ ledger and the bill.
 > runbook (the `kubectl apply`, the loader, the publisher `go run`) prefix them
 > with `env -u GOOGLE_APPLICATION_CREDENTIALS ...` or `unset` it in your shell.
 
-Prereqs: `gcloud` (authed ADC on `example-sandbox`), `kubectl`, `go`, `python3`,
+Prereqs: [`gcloud`](https://cloud.google.com/sdk/gcloud?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) (authed ADC on `example-sandbox`), `kubectl`, `go`, `python3`,
 `shellcheck`; run from the repo root.
 
 ---
@@ -90,11 +90,11 @@ Run the infra scripts **in order**. Each is idempotent and sources
 bash infra/00-preflight.sh        # APIs, ADC, rapid channel >= min GKE version, AND L4 quota in the new region
 bash infra/01-cluster.sh          # GKE Standard cluster "spot-demo" in us-east1  (~8 min)
 bash infra/02-computeclasses.sh   # apply batch-cpu AND batch-gpu ComputeClasses
-bash infra/03-pubsub.sh           # topics, subs, GSAs, IAM, Workload Identity, image repo (Artifact Registry)
+bash infra/03-pubsub.sh           # topics, subs, GSAs, IAM, Workload Identity, image repo
 ```
 
 `04-build.sh` is the long pole (the `embed-worker` torch image is **10–25 min**;
-it builds queue-worker, embed-worker and tune-worker into the Artifact Registry
+it builds queue-worker, embed-worker and tune-worker into the [Artifact Registry](https://cloud.google.com/artifact-registry/docs?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab)
 repo `03` just created, **and then** the `capacity-advisor` image the reconciler
 runs — the advisor goes last, after all three workers). Kick it off in the
 background and let it bake while the remaining scripts run:
@@ -178,7 +178,7 @@ kubectl apply -f workloads/02-embeddings/manifests/job.yaml
 
 The Job is `Indexed`, `completions: 8`, `parallelism: 2` — eight corpus shards,
 two GPU pods at a time. Each pod requests one `nvidia.com/gpu`, so the `batch-gpu`
-ComputeClass auto-provisions `g2` **spot** nodes (one L4 each). NAP sizes the
+ComputeClass auto-provisions `g2` **spot** nodes (one L4 each). [NAP](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) sizes the
 machine to fit the pod (cpu 3 + 1×L4), so it may land on `g2-standard-8` rather
 than `g2-standard-4` — either is one L4. Watch:
 
@@ -205,7 +205,7 @@ CLASS=batch-gpu bash demo/preempt.sh
 a real `simulate-maintenance-event`. Evidence to capture:
 
 - `progress.sh` **batches-written count before vs after** the kill — it **never
-  decreases** (completed batches are durable in GCS + Firestore),
+  decreases** (completed batches are durable in GCS + [Firestore](https://cloud.google.com/firestore/docs?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab)),
 - a **replacement** `g2` spot node appears and the evicted pod reschedules, and
 - the resumed pod logs the resume line proving it skipped finished work:
 
@@ -248,9 +248,9 @@ down (give a couple of minutes of cool-down first):
 kill "${COLLECTOR_PID}"
 ```
 
-Build the two-factor report. `g2` on-demand list price comes from the Cloud
-Billing Catalog; spot comes from the advisor's
-`capacityHistory` signal. `--interval` **must** match the collector's
+Build the two-factor report. `g2` on-demand list price comes from the [Cloud
+Billing Catalog](https://cloud.google.com/billing/v1/how-tos/catalog-api?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab); spot comes from the advisor's
+[`capacityHistory`](https://cloud.google.com/sdk/gcloud/reference/beta/compute/advice/capacity-history?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) signal. `--interval` **must** match the collector's
 `COLLECT_INTERVAL` so node-hours are computed correctly:
 
 ```bash
@@ -469,7 +469,7 @@ chunks embedded).
    - the GPU class pairs **`whenUnsatisfiable: DoNotScaleUp`** with a **flexStart
      fallback rung**, which is what surfaced the `unexpected.error`.
 
-   **Fix applied for this run:** replace the `batch-gpu` ComputeClass with a single
+   **Fix applied for this run:** replace the `batch-gpu` [ComputeClass](https://cloud.google.com/kubernetes-engine/docs/concepts/about-custom-compute-classes?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) with a single
    spot rung that carries an explicit `gpu:` block:
 
    ```yaml

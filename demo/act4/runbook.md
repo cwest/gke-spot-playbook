@@ -3,13 +3,13 @@
 Acts 1–3 proved that workloads survive spot preemption on a ladder. What they
 also proved, less comfortably, is how that ladder got built: a human ran
 `analyze`, read a report, believed an obtainability score, watched it fail, and
-then hand-edited the live ComputeClass — twice. Act 3's saga is four region
+then hand-edited the live [ComputeClass](https://cloud.google.com/kubernetes-engine/docs/concepts/about-custom-compute-classes?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) — twice. Act 3's saga is four region
 migrations, a live probe, and a `g2-standard-8` rung typed in by hand at the
 end. The ladder worked. The loop that produced it was a person refreshing logs.
 
 Act 4 removes the human. A CronJob ticks every ten minutes: it reads the
-cluster autoscaler's own record of what it could not provision, folds that into
-a decaying evidence ledger, rescores the capacity advice against it, and
+[cluster autoscaler](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-autoscaler?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab)'s own record of what it could not provision, folds that into
+a decaying evidence ledger, rescores the [capacity advice](https://cloud.google.com/sdk/gcloud/reference/beta/compute/advice/capacity?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) against it, and
 server-side applies the ladder — but only when the change is real enough to
 clear a hysteresis bar. This runbook is the live verification of that loop
 against the `spot-demo` cluster in `us-central1`, run on **2026-08-02 (UTC)**.
@@ -61,7 +61,7 @@ obtainability read `0.90` for zones that were, right then, empty. So the
 reconciler never trusts it alone — it multiplies it by evidence of what the
 autoscaler actually refused, and evidence wins.
 
-**The log read is gated.** `ingest` returns before querying Cloud Logging
+**The log read is gated.** `ingest` returns before querying [Cloud Logging](https://cloud.google.com/logging/docs?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab)
 unless at least one pod is pending against a managed class. A cluster with
 nothing waiting on capacity has nothing to learn, and pays nothing to learn it.
 The discriminator is `lastLogQuery` in the state ConfigMap: if it did not
@@ -780,7 +780,7 @@ itself, and leaves the money-spending probe as an explicit human decision.
 
 ## What is deliberately out of scope
 
-**ProvisioningRequest.** Act 3's saga ends by saying Act 4 "fixes this by
+**[ProvisioningRequest](https://cloud.google.com/kubernetes-engine/docs/how-to/provisioningrequest?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab).** Act 3's saga ends by saying Act 4 "fixes this by
 wiring a Kueue `ProvisioningRequest` admission check so the flex rung actually
 engages when spot is exhausted." **Act 4 does not do that**, and the promise
 should be read as retracted. `ProvisioningRequest` /

@@ -1,7 +1,7 @@
 # GKE Spot Playbook
 
-Running real workloads on **GKE Spot** capacity is cheap — often 60–90% off
-on-demand — but spot is *interruptible* and, for scarce shapes like GPUs, not
+Running real workloads on [**GKE Spot**](https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) capacity is cheap—often 60–90% off
+on-demand—but spot is *interruptible* and, for scarce shapes like GPUs, not
 always *obtainable*. This repo is a hands-on playbook for making spot dependable
 anyway: a capacity **advisor/reconciler** that turns the spot failure surface
 into a self-maintaining cost-and-obtainability ladder, plus lifecycle levers
@@ -20,7 +20,7 @@ Read an act, run it, watch the mechanism work.
 ## The idea in one picture
 
 The advisor runs on a schedule. Each tick it scores every candidate
-shape × zone, writes the winning rungs as GKE ComputeClasses, and learns from
+shape × zone, writes the winning rungs as [GKE ComputeClasses](https://cloud.google.com/kubernetes-engine/docs/concepts/about-custom-compute-classes?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab), and learns from
 what actually happened — observed provisioning failures decay in an evidence
 ledger, and (optionally) a live capacity probe confirms a scarce shape is
 really obtainable before widening onto it.
@@ -102,8 +102,8 @@ REGION=us-central1 bash infra/90-teardown.sh
 ```
 
 Idempotent and safe to re-run. It removes everything the demo creates (cluster,
-Pub/Sub, service accounts + IAM, Artifact Registry, the GCS bucket) and leaves
-the empty Firestore default database in place.
+[Pub/Sub](https://cloud.google.com/pubsub/docs/overview?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab), service accounts + IAM, [Artifact Registry](https://cloud.google.com/artifact-registry/docs?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab), the [GCS](https://cloud.google.com/storage/docs?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) bucket) and leaves
+the empty [Firestore](https://cloud.google.com/firestore/docs?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) default database in place.
 
 ## Status
 

@@ -10,14 +10,14 @@ Three beats: **advise → provision/run → survive**, then a zero-loss ledger.
 > runbook (the `kubectl apply`, the publisher `go run`) prefix them with
 > `env -u GOOGLE_APPLICATION_CREDENTIALS ...` or `unset` it in your shell first.
 
-Prereqs: `gcloud` (authed ADC on `example-sandbox`), `kubectl`, `go`,
+Prereqs: [`gcloud`](https://cloud.google.com/sdk/gcloud?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) (authed [ADC](https://cloud.google.com/docs/authentication/application-default-credentials?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) on `example-sandbox`), `kubectl`, `go`,
 `shellcheck`; run from the repo root.
 
 ---
 
 ## Beat 0 — Advise (~30s)
 
-Let the advisor pick the machine type, zone, and region from live spot signals.
+Let the advisor pick the machine type, zone, and region from live [spot](https://cloud.google.com/kubernetes-engine/docs/concepts/spot-vms?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) signals.
 
 ```bash
 cd advisor && env -u GOOGLE_APPLICATION_CREDENTIALS \
@@ -32,7 +32,7 @@ Talk track: open `out/advice-report-cpu-batch.md` and point at
 - the **preemption sparkline** (30-day daily preemption pattern per candidate),
 - the **composite score** ranking, and
 - the **chosen region/zone** — for cpu-batch this lands on
-  **t2d-standard-8 @ us-south1-b** (obtainability 0.90, spot **$0.0554/hr**).
+  **[t2d-standard-8](https://cloud.google.com/compute/docs/general-purpose-machines?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) @ us-south1-b** (obtainability 0.90, spot **$0.0554/hr**).
 
 The winning row is written to `out/cluster-config-cpu-batch.env`. Designate it for use by later scripts:
 
@@ -97,7 +97,7 @@ cd ../../..
 ```
 
 Watch KEDA go **ACTIVE**: replicas ramp `0 → N` (max 50), the `batch-cpu`
-ComputeClass provisions **t2d-standard-8 spot** nodes, and pods land on them.
+[ComputeClass](https://cloud.google.com/kubernetes-engine/docs/concepts/about-custom-compute-classes?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) provisions **t2d-standard-8 spot** nodes, and pods land on them.
 
 ---
 
@@ -110,10 +110,10 @@ bash demo/preempt.sh
 ```
 
 `demo/preempt.sh` picks one `gke-spot=true,compute-class=batch-cpu` node and
-sends it a `simulate-maintenance-event` (a real preemption signal). In the
+sends it a `simulate-maintenance-event` (a real [preemption](https://cloud.google.com/compute/docs/instances/simulating-host-maintenance?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) signal). In the
 `watch.sh` pane: **WORKERS replicas dip**, then recover as KEDA/GKE reschedule
 the evicted pods onto surviving or newly-provisioned spot capacity — and the
-**BACKLOG keeps draining**. In-flight tasks are redelivered (Pub/Sub
+**BACKLOG keeps draining**. In-flight tasks are redelivered ([Pub/Sub](https://cloud.google.com/pubsub/docs/overview?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab)
 at-least-once + 60s ack deadline), so nothing is dropped.
 
 > If no batch-cpu spot nodes exist yet, `preempt.sh` logs
@@ -170,7 +170,7 @@ kill "${COLLECTOR_PID}"
 ```
 
 Build the report from the samples. The `cost` subcommand prices on-demand from
-the **Cloud Billing Catalog** and spot from the advisor's **capacityHistory**
+the **[Cloud Billing Catalog](https://cloud.google.com/billing/v1/how-tos/catalog-api?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab)** and spot from the advisor's **[capacityHistory](https://cloud.google.com/sdk/gcloud/reference/beta/compute/advice/capacity-history?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab)**
 signal; `--interval` must match the collector's `COLLECT_INTERVAL` so node-hours
 are computed correctly (rows × interval):
 
@@ -250,7 +250,7 @@ freshness check, then publisher → scale-up → preemption → drain → verify
 
 - Cluster: `spot-demo`, region `us-south1`, control plane `v1.36.2-gke.1498000`.
 - Advisor-chosen target: `t2d-standard-8` **spot**, zone `us-south1-b`,
-  ComputeClass `batch-cpu`. Nodes were auto-provisioned by GKE NAP into node
+  ComputeClass `batch-cpu`. Nodes were auto-provisioned by GKE [NAP](https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-provisioning?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) into node
   pool `gke-spot-demo-nap-t2d-standard-8-spot-*` (all `compute-class=batch-cpu`,
   `gke-spot=true`, machine type `t2d-standard-8`, zone `us-south1-b`).
 - KEDA `ScaledObject` READY at 0 replicas before the run; deploy `0/0`.
@@ -279,7 +279,7 @@ freshness check, then publisher → scale-up → preemption → drain → verify
 
 ```
 NAME                                                  STATUS   ROLES    AGE    VERSION               COMPUTE-CLASS   GKE-SPOT
-gke-spot-demo-default-pool-f159fda5-ckgm              Ready    <none>   67m    v1.36.2-gke.1498000                   
+gke-spot-demo-default-pool-f159fda5-ckgm              Ready    <none>   67m    v1.36.2-gke.1498000
 gke-spot-demo-nap-t2d-standard-8-spot-a8c737e4-2l4v   Ready    <none>   42s    v1.36.2-gke.1498000   batch-cpu       true
 gke-spot-demo-nap-t2d-standard-8-spot-a8c737e4-gslf   Ready    <none>   71s    v1.36.2-gke.1498000   batch-cpu       true
 gke-spot-demo-nap-t2d-standard-8-spot-a8c737e4-jbzz   Ready    <none>   4m8s   v1.36.2-gke.1498000   batch-cpu       true
