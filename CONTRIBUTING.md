@@ -26,8 +26,29 @@ Guidelines](https://opensource.google/conduct/).
 
 ## Contribution process
 
+### Development setup
+
+Install the toolchain, then run the suite:
+
+```bash
+make tools   # installs the pinned kubeconform via `go install`
+make test    # Go tests, pytest, shellcheck, and manifest validation
+```
+
+`make tools` needs `go` (1.26+) on your PATH and installs into
+`$(go env GOPATH)/bin`, so make sure that directory is on your PATH. On macOS or
+Linuxbrew, `brew install kubeconform shellcheck` works just as well. You also
+need `python3` for the worker test suites.
+
+`make test` runs `check-tools` first, so a missing prerequisite reports which
+tool is absent and how to install it rather than failing with a bare
+`command not found`.
+
 ### Code Reviews
 
 All submissions, including submissions by project members, require review. We
 use [GitHub pull requests](https://docs.github.com/articles/about-pull-requests)
 for this purpose.
+
+Every pull request runs the full suite in CI, which validates against the same
+pinned tool versions your local `make test` uses.

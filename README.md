@@ -70,9 +70,12 @@ Each act lives in `demo/act<N>/` with a `runbook.md`. Start with Act 1.
 ## Quickstart
 
 Prerequisites: a GCP project you own, `gcloud`, `kubectl`, `go` (1.26+),
-`kubeconform`, and `shellcheck`.
+`python3`, `kubeconform`, and `shellcheck`.
 
 ```bash
+# 0. Install the pinned Go-based tooling (kubeconform). Or: brew install kubeconform shellcheck
+make tools
+
 # 1. Build and run the full test suite (Go + shellcheck + kubeconform).
 make test
 
