@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: queue-worker
+  namespace: act1-queue
+spec:
+  replicas: 0 # KEDA owns the replica count
+  selector:
+    matchLabels: {app: queue-worker}
+  template:
+    metadata:
+      labels: {app: queue-worker}
+    spec:
+      serviceAccountName: queue-worker
+      terminationGracePeriodSeconds: 25
+      nodeSelector:
+        cloud.google.com/compute-class: batch-cpu
+      tolerations:
+      - {key: cloud.google.com/gke-spot, operator: Equal, value: "true", effect: NoSchedule}
+      - {key: cloud.google.com/compute-class, operator: Equal, value: batch-cpu, effect: NoSchedule}
+      containers:
+      - name: worker
+        # us multi-region registry: one hostname for every US region, so the
+        # image path survives a region move without a rebuild or a rewrite.
+        image: us-docker.pkg.dev/example-sandbox/spot-demo/queue-worker:v1
+        env:
+        - {name: PROJECT, value: example-sandbox}
+        - {name: TASKS_SUB, value: spot-demo-tasks-sub}
+        - {name: COMPLETIONS_TOPIC, value: spot-demo-completions}
+        resources:
+          requests: {cpu: 500m, memory: 256Mi}
+          limits: {memory: 256Mi}

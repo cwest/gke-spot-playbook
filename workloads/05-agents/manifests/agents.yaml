@@ -1,0 +1,42 @@
+# GKE Agent Sandbox Pod Deployment
+# This Deployment runs the mock agent under GKE Agent Sandbox (gVisor isolation).
+# Pod snapshots are used to demonstrate idle-RAM reclaim via suspend/resume.
+# The agents compute-class pool and Agent Sandbox runtime are confirmed/created live in Task 6.
+# See demo/act5/runbook.md for the three-point density measurement.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agents
+  namespace: act5-agents
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-worker
+  template:
+    metadata:
+      labels:
+        app: agent-worker
+    spec:
+      serviceAccountName: agent-worker
+      runtimeClassName: gvisor
+      nodeSelector:
+        cloud.google.com/compute-class: agents
+      tolerations:
+      - {key: cloud.google.com/gke-spot, operator: Equal, value: "true", effect: NoSchedule}
+      - {key: cloud.google.com/compute-class, operator: Equal, value: agents, effect: NoSchedule}
+      containers:
+      - name: agent
+        image: us-docker.pkg.dev/example-sandbox/spot-demo/agent5:v1
+        imagePullPolicy: IfNotPresent
+        args:
+        - --working-set-mib=256
+        - --active-seconds=10
+        - --idle-seconds=30
+        - --state-file=/tmp/agent-state
+        resources:
+          requests:
+            memory: 512Mi
+            cpu: 100m
+          limits:
+            memory: 512Mi

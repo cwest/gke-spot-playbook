@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: act1-queue
+  labels:
+    team: spot-demo
+    act: queue

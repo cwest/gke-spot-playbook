@@ -1,0 +1,23 @@
+# Seeds one NAP-created MIG so the provocation has something to be rejected
+# from. The autoscaler can only log a rejectedMigs record for a MIG that
+# already exists; with no batch-cpu node pool it emits a pod-group-level
+# napFailureReasons entry that names a zone but no shape, which the evidence
+# parser correctly refuses to attribute. See demo/act4/runbook.md, Beat 3.
+#
+# This costs one t2d-standard-8 spot node for a few minutes. Delete it after
+# the provocation, and delete the auto-created node pool it leaves behind.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: seed-nap-mig
+  namespace: spot-demo
+spec:
+  restartPolicy: Never
+  nodeSelector:
+    cloud.google.com/compute-class: batch-cpu
+  containers:
+  - name: pause
+    image: registry.k8s.io/pause:3.10
+    resources:
+      requests:
+        cpu: "1"

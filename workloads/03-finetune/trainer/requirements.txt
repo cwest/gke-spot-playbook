@@ -1,0 +1,4 @@
+transformers==4.44.2
+peft==0.13.0
+datasets==3.0.0
+accelerate==0.34.2

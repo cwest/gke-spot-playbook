@@ -1,0 +1,53 @@
+# GKE Pod Snapshot configuration for vLLM serving workload
+# Enables periodic warm snapshots of GPU VRAM/CUDA state to GCS, supporting
+# fast restore-from-snapshot on scale-up (0→1) instead of cold model load.
+#
+# Prerequisites:
+# - Cluster has Pod snapshots enabled (--enable-pod-snapshots)
+# - Workload Identity enabled (hard prerequisite for snapshots)
+# - Snapshot bucket created (see infra/serving/snapshot-storage.md)
+# - IAM: gkenode service agent holds roles/storage.admin on bucket
+---
+apiVersion: podsnapshot.gke.io/v1
+kind: PodSnapshotStorageConfig
+metadata:
+  name: vllm-snapshot-storage
+  namespace: act6-serve
+spec:
+  snapshotStorageConfig:
+    gcs:
+      # Bucket name placeholder — replace with actual bucket from infra setup.
+      # The infra/serving/snapshot-storage.md doc and infra/09-serving-iam.sh
+      # script use the pattern: <PROJECT>-act6-snap
+      bucket: SNAP_BUCKET_PLACEHOLDER
+      # federatedP4SA ensures the gkenode service agent writes snapshots using
+      # GKE Workload Identity; no manual service account keys required.
+      tokenSource: federatedP4SA
+---
+apiVersion: podsnapshot.gke.io/v1
+kind: PodSnapshotPolicy
+metadata:
+  name: vllm-snapshot-policy
+  namespace: act6-serve
+spec:
+  storageConfigName: vllm-snapshot-storage
+  snapshotScope: whole-pod
+  selector:
+    matchLabels:
+      app: vllm-server
+  triggerConfig:
+    type: manual
+    # Stop the pod after successful checkpoint to free VRAM/GPU resources.
+    # On scale-up (0→1), KEDA recreates the pod with the restore annotation,
+    # and GKE restores from the latest PodSnapshot instead of cold-loading.
+    postCheckpoint: stop
+---
+apiVersion: podsnapshot.gke.io/v1
+kind: PodSnapshotManualTrigger
+metadata:
+  name: vllm-snapshot-trigger
+  namespace: act6-serve
+spec:
+  # Target pod name matches the Deployment template pod name pattern.
+  # Operator triggers this manually or via automation before scale-down.
+  targetPod: vllm-<replica-hash>

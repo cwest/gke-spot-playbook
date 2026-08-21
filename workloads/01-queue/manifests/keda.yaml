@@ -1,0 +1,28 @@
+apiVersion: keda.sh/v1alpha1
+kind: TriggerAuthentication
+metadata:
+  name: keda-gcp-wi
+  namespace: act1-queue
+spec:
+  podIdentity:
+    provider: gcp
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: queue-worker
+  namespace: act1-queue
+spec:
+  scaleTargetRef:
+    name: queue-worker
+  minReplicaCount: 0
+  maxReplicaCount: 50
+  cooldownPeriod: 60
+  triggers:
+  - type: gcp-pubsub
+    authenticationRef:
+      name: keda-gcp-wi
+    metadata:
+      subscriptionName: spot-demo-tasks-sub
+      mode: SubscriptionSize
+      value: "10"

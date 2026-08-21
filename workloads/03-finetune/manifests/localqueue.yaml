@@ -1,0 +1,7 @@
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: LocalQueue
+metadata:
+  name: gpu-queue
+  namespace: act3-finetune
+spec:
+  clusterQueue: gpu-cq
