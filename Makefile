@@ -1,5 +1,32 @@
-.PHONY: test test-go test-python test-shell test-manifests
-test: test-go test-python test-shell test-manifests
+.PHONY: test test-go test-python test-shell test-manifests tools check-tools
+
+# Pinned so CI and a laptop validate against the same schema logic.
+KUBECONFORM_VERSION ?= v0.8.0
+
+test: check-tools test-go test-python test-shell test-manifests
+
+## check-tools: fail with instructions, not `command not found`.
+check-tools:
+	@missing=0; \
+	for t in go shellcheck kubeconform python3; do \
+	  command -v $$t >/dev/null 2>&1 || { echo "missing: $$t"; missing=1; }; \
+	done; \
+	if [ $$missing -ne 0 ]; then \
+	  echo ""; \
+	  echo "Install the missing tools, then re-run \`make test\`:"; \
+	  echo "  make tools     # installs kubeconform $(KUBECONFORM_VERSION) via go install"; \
+	  echo "  brew install shellcheck kubeconform   # macOS/Linuxbrew alternative"; \
+	  echo ""; \
+	  echo "See CONTRIBUTING.md for the full prerequisite list."; \
+	  exit 1; \
+	fi
+
+## tools: install the pinned Go-based dev tooling into $(go env GOPATH)/bin.
+tools:
+	go install github.com/yannh/kubeconform/cmd/kubeconform@$(KUBECONFORM_VERSION)
+	@echo "installed kubeconform $(KUBECONFORM_VERSION) -> $$(go env GOPATH)/bin"
+	@command -v kubeconform >/dev/null 2>&1 || \
+	  echo "note: add $$(go env GOPATH)/bin to your PATH to pick it up."
 
 test-go:
 	cd advisor && go test ./...

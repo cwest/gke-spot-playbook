@@ -1,0 +1,52 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  merge_group:
+    branches: [main]
+
+# Keyed on ref so a merge-queue run (whose ref is unique per PR) never
+# cancels a sibling queued run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      # 1.26.x resolves to the latest patch, which must satisfy the HIGHEST
+      # `go` directive across the three modules (the workers ask for 1.26.5,
+      # the advisor for 1.26.0). Pointing this at a single go.mod would pin
+      # the toolchain below what the others require, because setup-go sets
+      # GOTOOLCHAIN=local and so denies Go its usual auto-download.
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version: '1.26.x'
+          cache-dependency-path: advisor/go.sum
+
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
+        with:
+          python-version: '3.12'
+
+      # shellcheck ships on ubuntu-latest; kubeconform does not.
+      - name: Install pinned tooling
+        run: |
+          make tools
+          echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Verify prerequisites resolve
+        run: make check-tools
+
+      - name: Run the full suite
+        run: make test
