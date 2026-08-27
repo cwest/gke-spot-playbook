@@ -33,7 +33,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/kube"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/kube"
 )
 
 // fieldManager identifies our server-side-apply ownership. Applying under a

@@ -1,6 +1,6 @@
 # Automated Verify-by-Probe Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For implementers:** This plan is written to be executed task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Gate the reconciler's widen/promote decisions on a live capacity probe — a successful probe confirms a `(shape, zone)` and lets the rung widen/promote onto it; a failure is inconclusive and never touches the evidence ledger.
 
@@ -15,8 +15,8 @@
 - **Never degrade a working ladder:** widen/promote only ever *adds* probe-confirmed options; a rung keeps its current zones/shape when nothing is confirmed.
 - Conservative budget constants (verbatim): `probeConfirmTTL = 30 * time.Minute`, `probesPerTick = 1`, `probesPerDay = 6`, `probeBudgetWindow = 24 * time.Hour`.
 - Opt-in: reconciler probing requires a new `probe.automated` flag (default false), which also gates the instance-create IAM binding. `probe.enabled` continues to gate only the human `probe` subcommand.
-- Commits: signed (`git commit -S`), emoji conventional, NO AI/assistant attribution. Commit gate (`git status` + `git log -n 3`) before each message.
-- Diagrams Mermaid, never ASCII. Subagents: `cd` into the worktree and confirm `git rev-parse --show-toplevel` ends in `topic+gke-spot-probe-automation` before any file/git op; after committing, confirm the commit is on the topic branch and `main` is unchanged.
+- Commits: signed (`git commit -S`), emoji conventional. Commit gate (`git status` + `git log -n 3`) before each message.
+- Diagrams Mermaid, never ASCII.
 - Pre-existing baseline flake (out of scope): `workloads/01-queue/worker` `TestRunStopsPromptlyOnCancelWithoutLosingTasks` fails intermittently on a cancel-timing race; passes on retry. Not this plan's code.
 
 ---

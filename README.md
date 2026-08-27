@@ -12,6 +12,11 @@ It's built as a series of **acts** — each a runnable scenario with a runbook
 whose every claim is tagged `LIVE` (measured on a real cluster) or `PROJECTED`.
 Read an act, run it, watch the mechanism work.
 
+> **Companion to the *Obtainability* series.** This repo is the reference
+> implementation for *Obtainability*, a hands-on series on making GKE Spot
+> dependable — the write-ups that explain *why* each act works live at
+> [caseywest.com](https://caseywest.com/). Read a post, then run its act here.
+
 > **Educational sample.** This is a demo/teaching repo, not a supported product.
 > The project id is a placeholder (`example-sandbox`); set your own before
 > running anything. Everything it builds is reproducible from `infra/` and torn
@@ -63,7 +68,7 @@ Each act lives in `demo/act<N>/` with a `runbook.md`. Start with Act 1.
   `09-*.sh`), the reconciler deployment, `migrate-region.sh`, and
   `90-teardown.sh`.
 - **`demo/`** — the acts (`act1`–`act7`), each with its runbook and helpers.
-- **`docs/`** — the operator runbook and, under `docs/superpowers/`, the design
+- **`docs/`** — the operator runbook and, under `docs/design/`, the design
   specs and implementation plans each act was built from (kept as a "how it was
   built" record).
 

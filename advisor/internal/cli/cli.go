@@ -25,17 +25,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/analyze"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/config"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/cost"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/density"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/kube"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/pricing"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/probe"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/reconcile"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/render"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/serving"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/analyze"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/config"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/cost"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/density"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/kube"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/pricing"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/probe"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/reconcile"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/render"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/serving"
 )
 
 type AnalyzeOpts struct {

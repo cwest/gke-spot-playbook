@@ -1,6 +1,6 @@
 # scaleUp Out-of-Resources Evidence Gap — Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For implementers:** This plan is written to be executed task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Collect genuine `scale.up.error.out.of.resources` stockouts on existing MIGs into the evidence ledger, and give Act 4 a reliable L4-spot recipe to provoke one on demand.
 
@@ -12,7 +12,7 @@
 
 - `make test` needs `PIP_INDEX_URL=https://pypi.org/simple`.
 - Go work runs from `advisor/`: `cd advisor && go test ./...`.
-- Commits: emoji conventional style (`<emoji> <type>(<scope>): <subject>`), signed (`git commit -S`), no AI/assistant attribution. Commit gate: `git status` + `git log -n 3` before each message.
+- Commits: emoji conventional style (`<emoji> <type>(<scope>): <subject>`), signed (`git commit -S`). Commit gate: `git status` + `git log -n 3` before each message.
 - Diagrams Mermaid, never ASCII.
 - Do NOT widen `migShapeRe`; L4 (`g2-standard-N`) parses as-is. `a2-ultragpu-1g` / `a3-highgpu-8g` stay out of scope.
 - Never store an observation missing shape or zone; never store a non-stockout scale-up error.
@@ -74,8 +74,8 @@ kubectl delete -f demo/act4/provoke-scaleup-stockout.yaml
 - [ ] **Step 8: Commit the fixtures.**
 
 ```bash
-cd /Users/caseywest/src/github/gke-spot-instance-node-pools/.claude/worktrees/topic+gke-spot-scaleup-evidence
-git add advisor/internal/evidence/gcplog/testdata/scaleup-stockout-*.json docs/superpowers/plans/2026-08-03-scaleup-evidence-gap.md
+cd <repo-root>   # the gke-spot-playbook working tree
+git add advisor/internal/evidence/gcplog/testdata/scaleup-stockout-*.json docs/design/plans/2026-08-03-scaleup-evidence-gap.md
 git commit -S -m "🧪 test(evidence): capture a real scaleUp stockout fixture"
 ```
 

@@ -25,12 +25,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice/fake"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/analyze"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/cost"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/density"
-	pricingfake "github.com/cwest/gke-spot-instance-node-pools/advisor/internal/pricing/fake"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice/fake"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/analyze"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/cost"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/density"
+	pricingfake "github.com/cwest/gke-spot-playbook/advisor/internal/pricing/fake"
 )
 
 // TestRenderDensityMarkdownPrecision guards against rounding sub-cent $/agent

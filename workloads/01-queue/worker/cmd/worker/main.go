@@ -24,7 +24,7 @@ import (
 
 	"cloud.google.com/go/pubsub"
 
-	"github.com/cwest/gke-spot-instance-node-pools/workloads/01-queue/worker/internal/work"
+	"github.com/cwest/gke-spot-playbook/workloads/01-queue/worker/internal/work"
 )
 
 func env(key, fallback string) string {

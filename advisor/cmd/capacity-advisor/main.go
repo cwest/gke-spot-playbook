@@ -25,13 +25,13 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice/gcp"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/cli"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/config"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/evidence/gcplog"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/kube/clientgo"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/pricing"
-	probegce "github.com/cwest/gke-spot-instance-node-pools/advisor/internal/probe/gce"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice/gcp"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/cli"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/config"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/evidence/gcplog"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/kube/clientgo"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/pricing"
+	probegce "github.com/cwest/gke-spot-playbook/advisor/internal/probe/gce"
 )
 
 func main() {

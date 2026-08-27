@@ -22,7 +22,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/machinetype"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/machinetype"
 )
 
 // ErrUnsupported marks machine families this demo does not price. The GPU

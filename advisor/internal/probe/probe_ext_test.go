@@ -23,8 +23,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/probe"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/probe/fake"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/probe"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/probe/fake"
 )
 
 func TestRunObtainsWhenStatusReachesRunning(t *testing.T) {

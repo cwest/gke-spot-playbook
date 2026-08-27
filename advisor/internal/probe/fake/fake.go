@@ -18,7 +18,7 @@ package fake
 import (
 	"context"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/probe"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/probe"
 )
 
 type Compute struct {

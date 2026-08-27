@@ -24,7 +24,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/analyze"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/analyze"
 )
 
 var update = flag.Bool("update", false, "rewrite golden files")

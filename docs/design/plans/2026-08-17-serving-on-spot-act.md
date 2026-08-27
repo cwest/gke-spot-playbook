@@ -1,6 +1,6 @@
 # Serving on Spot (Act 6) Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For implementers:** This plan is written to be executed task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Serve a small LLM (vLLM) on a single spot L4, scale it to zero when idle, and wake it fast via a GKE GPU Pod-snapshot warm restore instead of a cold model load — proving the lifecycle lever on serving.
 
@@ -44,7 +44,7 @@
 - Consumes: nothing.
 - Produces: a GO/NO-GO decision and two measured numbers — `cold_load_seconds` and `restore_seconds` — recorded in `demo/act6/spike/README.md`. Task 7 cites these; Tasks 2–6 are contingent on GO.
 
-- [ ] **Step 1: Invoke the prototype skill.** This spike is exactly a throwaway logic prototype; use `superpowers:prototype` to run it, keeping the code out of the product path.
+- [ ] **Step 1: Prototype the logic.** This spike is a throwaway logic prototype; run it separately, keeping the code out of the product path.
 
 - [ ] **Step 2: Stand up minimal snapshot-capable infra (manual, ephemeral).**
 

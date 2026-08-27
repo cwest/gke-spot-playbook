@@ -1,6 +1,6 @@
 # Act 7 — Obtainability under GPU scarcity — Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For implementers:** This plan is written to be executed task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Turn the existing capacity-probe machinery toward the A100 (`a2-highgpu-1g`) so the advisor proves obtainability under GPU scarcity — probe-confirmed widening and stockout-driven region failover — captured LIVE.
 
@@ -217,7 +217,7 @@ func TestLaunchProbesA100Candidate(t *testing.T) {
 - [ ] **Step 2: Run tests**
 
 Run: `cd advisor && go test ./internal/reconcile/ -run 'A100' -v`
-Expected: PASS (gate is shape-agnostic). If FAIL, `superpowers:systematic-debugging` → targeted fix in `reconcile/probe.go`, then re-run.
+Expected: PASS (gate is shape-agnostic). If FAIL, debug systematically → targeted fix in `reconcile/probe.go`, then re-run.
 
 - [ ] **Step 3: Commit**
 
@@ -481,8 +481,8 @@ git commit -S -m "📝 docs(act7): live obtainability evidence (LIVE-ORGANIC/LIV
 ## Final verification & review (workflow Steps 6–7)
 
 - [ ] Run the full suite from the worktree root: `make test` — expect exit 0 (Go + shellcheck + all kubeconform).
-- [ ] Invoke `superpowers:verification-before-completion` — confirm every §6 spec step is green and every runbook claim is `LIVE-*` or explicitly `PROJECTED`.
-- [ ] Invoke `superpowers:requesting-code-review` — per-task + whole-branch review (as Acts 5/6 did); address findings.
+- [ ] Verify before completion — confirm every §6 spec step is green and every runbook claim is `LIVE-*` or explicitly `PROJECTED`.
+- [ ] Code review — per-task + whole-branch review (as Acts 5/6 did); address findings.
 - [ ] Merge is a clean fast-forward from the **MAIN checkout** (worktree-isolation rail blocks merging from the worktree session). Leave `/tmp/act7-merge-handoff.md`.
 
 ## Self-review (plan vs spec)

@@ -19,7 +19,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/kube"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/kube"
 )
 
 // errInjected is a sentinel error used to test error propagation in override hooks.

@@ -20,7 +20,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/evidence"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/evidence"
 )
 
 type Log struct {

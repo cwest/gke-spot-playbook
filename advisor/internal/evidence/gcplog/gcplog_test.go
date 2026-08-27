@@ -24,7 +24,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/evidence"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/evidence"
 )
 
 // A trimmed but structurally faithful noScaleUp payload. The zone lives in

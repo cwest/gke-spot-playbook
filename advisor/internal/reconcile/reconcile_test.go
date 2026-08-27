@@ -22,14 +22,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice"
-	advicefake "github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice/fake"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/analyze"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/config"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/evidence"
-	gcplogfake "github.com/cwest/gke-spot-instance-node-pools/advisor/internal/evidence/gcplog/fake"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/kube"
-	kubefake "github.com/cwest/gke-spot-instance-node-pools/advisor/internal/kube/fake"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice"
+	advicefake "github.com/cwest/gke-spot-playbook/advisor/internal/advice/fake"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/analyze"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/config"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/evidence"
+	gcplogfake "github.com/cwest/gke-spot-playbook/advisor/internal/evidence/gcplog/fake"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/kube"
+	kubefake "github.com/cwest/gke-spot-playbook/advisor/internal/kube/fake"
 )
 
 func now(min int) time.Time {
