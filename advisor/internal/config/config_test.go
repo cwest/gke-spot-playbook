@@ -21,7 +21,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/evidence"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/evidence"
 )
 
 func write(t *testing.T, s string) string {

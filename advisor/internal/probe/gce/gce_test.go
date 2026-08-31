@@ -27,7 +27,7 @@ import (
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/option"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/probe"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/probe"
 )
 
 // newTestClient builds a Client whose Compute Engine calls terminate at a local

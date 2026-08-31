@@ -72,13 +72,10 @@ dispute. If you are unable to resolve the matter for any reason, or if the
 behavior is threatening or harassing, report it. We are dedicated to providing
 an environment where participants feel welcome and safe.
 
-Reports should be directed to *[PROJECT STEWARD NAME(s) AND EMAIL(s)]*, the
-Project Steward(s) for *[PROJECT NAME]*. It is the Project Steward’s duty to
-receive and address reported violations of the code of conduct. They will then
-work with a committee consisting of representatives from the Open Source
-Programs Office and the Google Open Source Strategy team. If for any reason you
-are uncomfortable reaching out to the Project Steward, please email
-opensource@google.com.
+Reports should be directed to the project maintainer listed in the repository
+(see `SECURITY.md` for the current private reporting contact). The maintainer
+receives and addresses reported violations of the code of conduct. Reports are
+handled confidentially.
 
 We will investigate every complaint, but you may not receive a direct response.
 We will use our discretion in determining when and how to follow up on reported

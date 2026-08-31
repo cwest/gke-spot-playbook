@@ -1,6 +1,6 @@
 # Capacity Advisor CLI Implementation Plan (Plan 1 of 4)
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For implementers:** This plan is written to be executed task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build the `capacity-advisor` Go CLI (`analyze` + `render`) that scores spot candidates via the beta `advice.capacity`/`advice.capacityHistory` APIs and renders ComputeClass ladders, a report, and cluster config.
 
@@ -14,12 +14,12 @@
 - `advice.capacityHistory` accepts only `provisioningModel: SPOT`; `advice.capacity` caps at 5 machine types per request; obtainability < 0.4 is the documented "Low" band → hard-drop.
 - Uptime factors: 3600s→1.0, 600s→0.6, 60s→0.2 (missing→0.6, flagged). Composite: `obtainability² × uptime × preemption × price`.
 - Max 3 spot rungs per ComputeClass; GPU class gets a `flexStart` rung and `whenUnsatisfiable: DoNotScaleUp`; CPU class gets `ScaleUpAnyway`.
-- Commit style: Casey's conventional-commits-with-emoji (see `~/.claude/CLAUDE.md`); commits signed; **no AI attribution trailers**.
+- Commit style: conventional commits with emoji; commits signed.
 - Diagrams anywhere in docs: Mermaid only, never ASCII.
 
 ## File Structure
 
-- `advisor/go.mod` — module `github.com/cwest/gke-spot-instance-node-pools/advisor`
+- `advisor/go.mod` — module `github.com/cwest/gke-spot-playbook/advisor`
 - `advisor/cmd/capacity-advisor/main.go` — thin cobra wiring only
 - `advisor/internal/cli/cli.go` — testable command runners (deps injected)
 - `advisor/internal/config/config.go` — `advisor.yaml` load + defaults + validation
@@ -77,7 +77,7 @@ hysteresis:
 caps:
   maxSpotRungs: 3
 EOF
-mkdir -p advisor && cd advisor && go mod init github.com/cwest/gke-spot-instance-node-pools/advisor && go get gopkg.in/yaml.v3 github.com/google/go-cmp/cmp
+mkdir -p advisor && cd advisor && go mod init github.com/cwest/gke-spot-playbook/advisor && go get gopkg.in/yaml.v3 github.com/google/go-cmp/cmp
 ```
 
 - [ ] **Step 2: Write the failing test**
@@ -701,7 +701,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice"
 )
 
 type API struct {
@@ -800,7 +800,7 @@ import (
 
 	"google.golang.org/api/option"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice"
 )
 
 func server(t *testing.T) *httptest.Server {
@@ -898,7 +898,7 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice"
 )
 
 type Client struct {
@@ -1091,9 +1091,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice/fake"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/config"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice/fake"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/config"
 )
 
 func cfg() *config.Config {
@@ -1198,11 +1198,11 @@ import (
 	"sort"
 	"time"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/config"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/machinetype"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/regions"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/score"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/config"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/machinetype"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/regions"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/score"
 )
 
 type Candidate struct {
@@ -1394,7 +1394,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/analyze"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/analyze"
 )
 
 var update = flag.Bool("update", false, "rewrite golden files")
@@ -1486,7 +1486,7 @@ import (
 	"sort"
 	"text/template"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/analyze"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/analyze"
 )
 
 type rung struct {
@@ -1699,7 +1699,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/analyze"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/analyze"
 )
 
 var sparks = []rune("▁▂▃▄▅▆▇█")
@@ -1839,7 +1839,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/analyze"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/analyze"
 )
 
 // ClusterConfig emits the env file infra scripts source to create the cluster
@@ -1920,8 +1920,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice/fake"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice/fake"
 )
 
 func testAPI() *fake.API {
@@ -2011,10 +2011,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/analyze"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/config"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/render"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/analyze"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/config"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/render"
 )
 
 type AnalyzeOpts struct {
@@ -2109,8 +2109,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice/gcp"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/cli"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice/gcp"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/cli"
 )
 
 func main() {

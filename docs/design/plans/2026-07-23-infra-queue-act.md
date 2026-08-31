@@ -1,6 +1,6 @@
 # Cluster Infra + Act 1 Queue Processing Implementation Plan (Plan 2 of 4)
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For implementers:** This plan is written to be executed task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Stand up the advisor-informed GKE cluster (Standard, region chosen by the advisor) with the `batch-cpu` ComputeClass, and run Act 1: a Pub/Sub task queue drained by KEDA-scaled workers on spot nodes that provably lose zero tasks through a live preemption.
 
@@ -16,7 +16,7 @@
 - Spot workers: `terminationGracePeriodSeconds: 25`; tolerations for `cloud.google.com/gke-spot="true":NoSchedule` AND `cloud.google.com/compute-class=batch-cpu:NoSchedule`; `nodeSelector: {cloud.google.com/compute-class: batch-cpu}`.
 - Naming: Pub/Sub topic `spot-demo-tasks`, subscription `spot-demo-tasks-sub` (ack deadline 60s), completions topic `spot-demo-completions`, sub `spot-demo-completions-verify`; namespace `act1-queue`; KSA `queue-worker`; GSA `spot-demo-worker@example-sandbox.iam.gserviceaccount.com`; KEDA GSA `spot-demo-keda@example-sandbox.iam.gserviceaccount.com`; AR repo `spot-demo` (region from cluster-config.env).
 - All infra scripts: `#!/usr/bin/env bash`, `set -euo pipefail`, idempotent (safe to re-run), source `infra/lib/common.sh`.
-- Commit style: Casey's conventional-commits-with-emoji; signed; **no AI attribution trailers**. Diagrams (if any) Mermaid only.
+- Commit style: conventional commits with emoji; signed. Diagrams (if any) Mermaid only.
 - Teardown must remove everything the scripts create (`infra/90-teardown.sh`), updated in the same task that creates a resource.
 
 ## File Structure
@@ -384,7 +384,7 @@ git commit -m "✨ feat(infra): pubsub, service accounts, workload identity, reg
 ### Task 5: Act 1 worker (Go, TDD with pstest) + publisher + Dockerfile + build script
 
 **Files:**
-- Create: `workloads/01-queue/worker/go.mod` (module `github.com/cwest/gke-spot-instance-node-pools/workloads/01-queue/worker`), `workloads/01-queue/worker/main.go`, `workloads/01-queue/worker/internal/work/work.go`, `workloads/01-queue/worker/internal/work/work_test.go`, `workloads/01-queue/worker/Dockerfile`, `workloads/01-queue/publisher/main.go` (same module, `publisher` dir under worker module? NO — see below), `infra/04-build.sh`
+- Create: `workloads/01-queue/worker/go.mod` (module `github.com/cwest/gke-spot-playbook/workloads/01-queue/worker`), `workloads/01-queue/worker/main.go`, `workloads/01-queue/worker/internal/work/work.go`, `workloads/01-queue/worker/internal/work/work_test.go`, `workloads/01-queue/worker/Dockerfile`, `workloads/01-queue/publisher/main.go` (same module, `publisher` dir under worker module? NO — see below), `infra/04-build.sh`
 
 Module layout: ONE module at `workloads/01-queue/worker` containing `cmd/worker/main.go`, `cmd/publisher/main.go`, and `internal/work/`. (Single go.mod keeps the image build and local publisher runs simple.)
 
@@ -535,7 +535,7 @@ func TestRunStopsPromptlyOnCancelWithoutLosingTasks(t *testing.T) {
 - [ ] **Step 2: Run tests to verify they fail**
 
 ```bash
-cd workloads/01-queue/worker && go mod init github.com/cwest/gke-spot-instance-node-pools/workloads/01-queue/worker \
+cd workloads/01-queue/worker && go mod init github.com/cwest/gke-spot-playbook/workloads/01-queue/worker \
   && go get cloud.google.com/go/pubsub google.golang.org/api google.golang.org/grpc
 go test ./internal/work/
 ```
@@ -616,7 +616,7 @@ import (
 
 	"cloud.google.com/go/pubsub"
 
-	"github.com/cwest/gke-spot-instance-node-pools/workloads/01-queue/worker/internal/work"
+	"github.com/cwest/gke-spot-playbook/workloads/01-queue/worker/internal/work"
 )
 
 func env(key, fallback string) string {

@@ -5,6 +5,3 @@ advisor/capacity-advisor
 .venv/
 __pycache__/
 corpus.jsonl
-
-# Subagent-driven development scratch (progress ledger, briefs, review packages)
-.superpowers/

@@ -18,9 +18,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/evidence"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/evidence/gcplog"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/evidence/gcplog/fake"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/evidence"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/evidence/gcplog"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/evidence/gcplog/fake"
 )
 
 // logSource mirrors the interface the reconciler will consume. Asserting it

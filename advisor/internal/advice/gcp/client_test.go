@@ -25,7 +25,7 @@ import (
 
 	"google.golang.org/api/option"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice"
 )
 
 func server(t *testing.T) *httptest.Server {

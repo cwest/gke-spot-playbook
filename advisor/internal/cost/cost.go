@@ -29,7 +29,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/pricing"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/pricing"
 )
 
 // Usage aggregates the samples for one (machine type, lifecycle) pair.

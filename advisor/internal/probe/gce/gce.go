@@ -26,7 +26,7 @@ import (
 	"google.golang.org/api/googleapi"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/probe"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/probe"
 )
 
 // bootImage is a minimal image; the probe never runs a workload, it only asks

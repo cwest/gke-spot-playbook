@@ -1,6 +1,6 @@
 # Act 5 — Agent Lifecycle — Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For implementers:** This plan is written to be executed task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** A runnable Act 5 that reproduces the shape of Google's GKE Agent Sandbox benchmark (baseline → +gVisor → +suspend/resume) to prove idle-RAM reclaim (lifecycle) beats isolation as the agent-fleet cost lever.
 
@@ -11,13 +11,13 @@
 ## Global Constraints
 
 - `make test` needs `PIP_INDEX_URL=https://pypi.org/simple`; advisor Go work runs from `advisor/`.
-- Mock agent is a **separate Go module** under `workloads/05-agents/agent/` (mirrors `workloads/01-queue/worker` — module `github.com/cwest/gke-spot-instance-node-pools/workloads/05-agents/agent`).
+- Mock agent is a **separate Go module** under `workloads/05-agents/agent/` (mirrors `workloads/01-queue/worker` — module `github.com/cwest/gke-spot-playbook/workloads/05-agents/agent`).
 - The density tool lives in the **advisor module** (reuses `pricing.OnDemandHourlyUSD`).
 - **Measure all three ladder points** (P1 baseline, P2 +gVisor sandbox, P3 +suspend/resume) — the isolation-vs-lifecycle claim is comparative.
 - **Restore is not network-transparent** (new IP, dropped sockets): the agent must be reconnect-tolerant; the runbook states it honestly.
 - Node price via `pricing.BillingSource.OnDemandHourlyUSD(ctx, region, machineType)`; `$/agent = nodeHourlyUSD / agentsPacked`.
-- Commits signed (`git commit -S`), emoji conventional, NO AI/assistant attribution. Commit gate (`git status` + `git log -n 3`) before each message.
-- Diagrams Mermaid, never ASCII. Subagents: `cd` into the worktree, assert `git rev-parse --show-toplevel` ends in `topic+gke-agent-lifecycle-act` before any file/git op; after committing confirm the commit is on the topic branch and `git rev-parse --short main` is `1c7c226` (unchanged).
+- Commits signed (`git commit -S`), emoji conventional. Commit gate (`git status` + `git log -n 3`) before each message.
+- Diagrams Mermaid, never ASCII.
 - Task 6 (live run) is a BILLED gate — needs explicit human go-ahead (like the probe VM).
 - Pre-existing baseline flake (out of scope): `workloads/01-queue/worker` cancel-timing test; passes on retry.
 

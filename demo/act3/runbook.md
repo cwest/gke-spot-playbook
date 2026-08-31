@@ -119,7 +119,7 @@ window). Match `COLLECT_INTERVAL` to the `--interval` you will pass to `cost`:
 ```bash
 rm -f out/cost-samples-act3.csv
 COLLECT_INTERVAL=15 bash demo/cost/collector.sh out/cost-samples-act3.csv &
-echo $! > .superpowers/sdd/collector-act3.pid
+echo $! > out/collector-act3.pid
 ```
 
 Apply the namespace, service account ([Workload Identity](https://cloud.google.com/kubernetes-engine/docs/concepts/workload-identity?utm_campaign=CDR_0x5d16fa53_user-journey_b550269617&utm_medium=external&utm_source=lab) → `spot-demo-tune` GSA),
@@ -244,7 +244,7 @@ Once the Job reaches `Complete` (bounded at `MAX_STEPS=300`) and the `g2` node h
 scaled back down (a couple of minutes of cool-down), stop the collector:
 
 ```bash
-kill "$(cat .superpowers/sdd/collector-act3.pid)"
+kill "$(cat out/collector-act3.pid)"
 ```
 
 Build the two-factor report. `g2` on-demand list price comes from the [Cloud

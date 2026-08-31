@@ -23,12 +23,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice"
-	advfake "github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice/fake"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/evidence"
-	kubefake "github.com/cwest/gke-spot-instance-node-pools/advisor/internal/kube/fake"
-	probefake "github.com/cwest/gke-spot-instance-node-pools/advisor/internal/probe/fake"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/reconcile"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice"
+	advfake "github.com/cwest/gke-spot-playbook/advisor/internal/advice/fake"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/evidence"
+	kubefake "github.com/cwest/gke-spot-playbook/advisor/internal/kube/fake"
+	probefake "github.com/cwest/gke-spot-playbook/advisor/internal/probe/fake"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/reconcile"
 )
 
 // stubLog satisfies reconcile.LogSource with a fixed observation set.

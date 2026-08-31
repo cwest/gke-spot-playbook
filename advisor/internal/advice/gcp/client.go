@@ -32,7 +32,7 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice"
 )
 
 type Client struct {

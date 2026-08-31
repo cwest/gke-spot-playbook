@@ -37,7 +37,7 @@ import (
 
 	logging "google.golang.org/api/logging/v2"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/evidence"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/evidence"
 )
 
 // logName is the GKE-managed stream that carries autoscaler decisions.

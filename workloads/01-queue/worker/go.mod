@@ -1,4 +1,4 @@
-module github.com/cwest/gke-spot-instance-node-pools/workloads/01-queue/worker
+module github.com/cwest/gke-spot-playbook/workloads/01-queue/worker
 
 go 1.26.5
 

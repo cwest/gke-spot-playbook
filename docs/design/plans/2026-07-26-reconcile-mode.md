@@ -1,6 +1,6 @@
 # Plan 4 — Reconcile Mode Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For implementers:** This plan is written to be executed task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Turn the one-shot capacity advisor into an in-cluster reconciler that continuously re-ranks the spot ladder using observed provisioning failures as evidence, and make the demo stack portable enough to follow the reconciler's region advice.
 
@@ -8,14 +8,13 @@
 
 **Tech Stack:** Go 1.26 (cobra, `cloud.google.com/go/compute/apiv1beta`, `google.golang.org/api/logging/v2`, new: `k8s.io/client-go`), bash + gcloud for infra, GKE Standard with custom ComputeClasses (`cloud.google.com/v1`), Kueue v0.19.
 
-**Design doc:** `docs/superpowers/specs/2026-07-26-plan4-reconcile-mode-design.md`
+**Design doc:** `docs/design/specs/2026-07-26-plan4-reconcile-mode-design.md`
 
 ## Global Constraints
 
 - Project is `example-sandbox`; cluster is `spot-demo`; git email is `<your-git-email>`.
-- Go module path is `github.com/cwest/gke-spot-instance-node-pools/advisor`. Go version `1.26`.
+- Go module path is `github.com/cwest/gke-spot-playbook/advisor`. Go version `1.26`.
 - Every Go package gets a package doc comment on the first line of its primary file.
-- Never write AI/assistant attribution into commits, docs, code comments, or PRs.
 - All diagrams in docs are Mermaid in ```` ```mermaid ```` fences. Never ASCII/box-drawing.
 - All commits must be signed. Follow the commit gate: `git status` then `git log -n 3` before writing a message. Commit style: `<emoji> <type>(<scope>): <subject>` — lowercase, imperative, no trailing period.
 - Bash scripts: `set -euo pipefail`, source `infra/lib/common.sh`, call `spotdemo::init`, must pass `shellcheck`.
@@ -791,7 +790,7 @@ func Dry(factor float64, p Params) bool { return factor < p.DryBelow }
 - [ ] **Step 4: Run the test**
 
 Run: `cd advisor && go test ./internal/evidence/...`
-Expected: `ok  github.com/cwest/gke-spot-instance-node-pools/advisor/internal/evidence`
+Expected: `ok  github.com/cwest/gke-spot-playbook/advisor/internal/evidence`
 
 - [ ] **Step 5: Write the failing config test**
 
@@ -1150,7 +1149,7 @@ import (
 
 	logging "google.golang.org/api/logging/v2"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/evidence"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/evidence"
 )
 
 // logName is the GKE-managed stream that carries autoscaler decisions.
@@ -1302,7 +1301,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/evidence"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/evidence"
 )
 
 type Log struct {
@@ -1982,7 +1981,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/kube"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/kube"
 )
 
 // The fake must satisfy the real interface; this is the point of the package.
@@ -2113,7 +2112,7 @@ package fake
 import (
 	"context"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/kube"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/kube"
 )
 
 type Cluster struct {
@@ -2203,7 +2202,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/kube"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/kube"
 )
 
 // fieldManager identifies our server-side-apply ownership. Applying under a
@@ -2423,13 +2422,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice"
-	advicefake "github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice/fake"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/config"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/evidence"
-	gcplogfake "github.com/cwest/gke-spot-instance-node-pools/advisor/internal/evidence/gcplog/fake"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/kube"
-	kubefake "github.com/cwest/gke-spot-instance-node-pools/advisor/internal/kube/fake"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice"
+	advicefake "github.com/cwest/gke-spot-playbook/advisor/internal/advice/fake"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/config"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/evidence"
+	gcplogfake "github.com/cwest/gke-spot-playbook/advisor/internal/evidence/gcplog/fake"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/kube"
+	kubefake "github.com/cwest/gke-spot-playbook/advisor/internal/kube/fake"
 )
 
 func now(min int) time.Time {
@@ -2580,12 +2579,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/analyze"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/config"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/evidence"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/kube"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/render"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/analyze"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/config"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/evidence"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/kube"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/render"
 )
 
 // LogSource yields observed provisioning failures newer than `since`.
@@ -3171,7 +3170,7 @@ func TestAdvisoryEventIsEmittedOnlyOnChange(t *testing.T) {
 }
 ```
 
-Add the imports these need: `fmt` and `"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/analyze"`.
+Add the imports these need: `fmt` and `"github.com/cwest/gke-spot-playbook/advisor/internal/analyze"`.
 
 - [ ] **Step 8: Run the full reconcile suite**
 
@@ -3423,7 +3422,7 @@ package fake
 import (
 	"context"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/probe"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/probe"
 )
 
 type Compute struct {
@@ -3465,7 +3464,7 @@ import (
 	computepb "cloud.google.com/go/compute/apiv1/computepb"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/probe"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/probe"
 )
 
 // bootImage is a minimal image; the probe never runs a workload, it only asks
@@ -3715,11 +3714,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice"
-	advfake "github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice/fake"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/evidence"
-	kubefake "github.com/cwest/gke-spot-instance-node-pools/advisor/internal/kube/fake"
-	probefake "github.com/cwest/gke-spot-instance-node-pools/advisor/internal/probe/fake"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice"
+	advfake "github.com/cwest/gke-spot-playbook/advisor/internal/advice/fake"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/evidence"
+	kubefake "github.com/cwest/gke-spot-playbook/advisor/internal/kube/fake"
+	probefake "github.com/cwest/gke-spot-playbook/advisor/internal/probe/fake"
 )
 
 // stubLog satisfies reconcile.LogSource with a fixed observation set.
@@ -3966,7 +3965,7 @@ Expected: `ok`.
 
 - [ ] **Step 5: Wire the commands into `main.go`**
 
-Add to the imports: `"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/evidence/gcplog"`, `"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/kube/clientgo"`, `probegce "github.com/cwest/gke-spot-instance-node-pools/advisor/internal/probe/gce"`.
+Add to the imports: `"github.com/cwest/gke-spot-playbook/advisor/internal/evidence/gcplog"`, `"github.com/cwest/gke-spot-playbook/advisor/internal/kube/clientgo"`, `probegce "github.com/cwest/gke-spot-playbook/advisor/internal/probe/gce"`.
 
 Insert before `root.AddCommand(...)`:
 
@@ -4062,7 +4061,7 @@ func projectFromEnvOr(configPath string) string {
 }
 ```
 
-(add `"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/config"` to main's imports)
+(add `"github.com/cwest/gke-spot-playbook/advisor/internal/config"` to main's imports)
 
 - [ ] **Step 6: Verify the CLI surface**
 
@@ -4521,8 +4520,8 @@ scope would silently blind the evidence path."
 > verified against fakes. This one mutates the live `example-sandbox`
 > project: it builds and pushes images, creates a service account with IAM
 > bindings, and installs a CronJob that writes cluster-scoped resources on a
-> timer. Casey drives it directly (decided 2026-07-26). A subagent stops
-> after Task 12 and reports.
+> timer. It is driven directly by an operator (decided 2026-07-26); the
+> automated plan run stops after Task 12 and reports.
 
 Everything so far is verified against fakes. This task proves the loop closes against the real cluster, and writes down what was observed.
 

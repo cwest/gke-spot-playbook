@@ -20,9 +20,9 @@ import (
 	"sort"
 	"time"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/analyze"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/probe"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/render"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/analyze"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/probe"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/render"
 )
 
 // Probe confirmation types and constants.

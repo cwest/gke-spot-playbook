@@ -1,6 +1,6 @@
 # Cost Accounting Implementation Plan (Plan 2.5 of the demo roadmap)
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For implementers:** This plan is written to be executed task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Give every act a machine-produced "pays for itself" readout (actual spot cost vs spot-discount counterfactual vs always-on counterfactual) and add cost controls (`priceExponent`, `maxHourlyUSDPerUnit`) to the advisor's scoring.
 
@@ -16,7 +16,7 @@
 - Budget cap: `maxHourlyUSDPerUnit` drops a candidate only when its price is KNOWN and exceeds the cap (flag `over-budget`); unknown price stays neutral + flagged `no-price`, never cap-dropped.
 - Naming: collector CSV `out/cost-samples.csv`, header `ts,node,machine_type,lifecycle,compute_class`; lifecycle values `spot|on-demand`; cost artifacts `out/cost-report.md`, `out/cost-report.json`.
 - GPU pricing is Plan 3 scope: `pricing` package must return a typed `ErrUnsupported` for non-{e2,n2,t2d} families; cost report surfaces such nodes as "unpriced" rather than failing.
-- Commit style: Casey's conventional-commits-with-emoji; signed; no AI attribution trailers. Mermaid only for diagrams.
+- Commit style: conventional commits with emoji; signed. Mermaid only for diagrams.
 
 ## File Structure
 

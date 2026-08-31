@@ -21,7 +21,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/analyze"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/analyze"
 )
 
 var sparks = []rune("▁▂▃▄▅▆▇█")

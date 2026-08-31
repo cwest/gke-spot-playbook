@@ -1,4 +1,4 @@
-module github.com/cwest/gke-spot-instance-node-pools/advisor
+module github.com/cwest/gke-spot-playbook/advisor
 
 go 1.26.0
 

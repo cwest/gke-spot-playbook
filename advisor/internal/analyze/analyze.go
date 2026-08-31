@@ -21,12 +21,12 @@ import (
 	"sort"
 	"time"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/config"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/evidence"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/machinetype"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/regions"
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/score"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/config"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/evidence"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/machinetype"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/regions"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/score"
 )
 
 // EvidenceSource supplies observed-failure penalties per shape and zone. It is

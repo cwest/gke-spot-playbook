@@ -18,7 +18,7 @@ package fake
 import (
 	"context"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/kube"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/kube"
 )
 
 type Cluster struct {

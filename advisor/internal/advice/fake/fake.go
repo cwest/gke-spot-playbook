@@ -19,7 +19,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/cwest/gke-spot-instance-node-pools/advisor/internal/advice"
+	"github.com/cwest/gke-spot-playbook/advisor/internal/advice"
 )
 
 type API struct {
